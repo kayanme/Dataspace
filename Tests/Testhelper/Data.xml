@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programmer Id="ключ1" Name="Василий">
+  <Departament  Id="ключ2" Name="№5">
+    <CupCounter Id="ключ1" Name="Василий" Count="6"/>
+  </Departament>
+</Programmer>
+            
+            
+            

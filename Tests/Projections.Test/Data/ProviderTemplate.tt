@@ -1,0 +1,96 @@
+﻿<#@ template  language="C#"  debug="true" hostSpecific="true" #>
+<#@ include file="EF.Utility.CS.ttinclude"#>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#
+CodeGenerationTools code = new CodeGenerationTools(this);
+MetadataLoader loader = new MetadataLoader(this);
+CodeRegion region = new CodeRegion(this, 1);
+MetadataTools ef = new MetadataTools(this);
+
+string inputFile = @"..\TestElements.edmx";
+EdmItemCollection ItemCollection = loader.CreateEdmItemCollection(inputFile);
+string namespaceName = code.VsNamespaceSuggestion();
+
+EntityFrameworkTemplateFileManager fileManager = EntityFrameworkTemplateFileManager.Create(this);
+fileManager.StartHeader();
+ #>
+ //*********************************************************
+//
+//    Copyright (c) Microsoft. All rights reserved.
+//    This code is licensed under the Microsoft Public License.
+//    THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+//    ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+//    IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+//    PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+ <#
+
+
+
+ fileManager.EndBlock();
+
+
+foreach (EntityType entity in ItemCollection.GetItems<EntityType>()
+											.Where(e=>Accessibility.ForType(e).ToUpper()!="INTERNAL")										  
+                                            .OrderBy(e => e.Name))
+{
+     var entityName = entity.Name;
+     fileManager.StartNewFile(entityName + "Provider.cs");
+	 var pkey = entity.KeyMembers.First().Name;
+	 var name =  code.Escape(entityName);
+#>
+using System;
+using System.Collections.Generic;
+using Dataspace.Common.ClassesForImplementation;
+using System.ComponentModel.Composition;
+using System.Diagnostics.Contracts;
+using System.Linq;
+
+namespace  <#=namespaceName#>
+
+{
+    [Export(typeof(ResourceGetter))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    [Pure]
+    public partial class <#=name#>Provider : ResourceGetter<<#=name#>>
+    {
+	
+	    [Import]
+        private ResourcePool _pool;
+
+        protected override <#=name#> GetItemTyped(Guid id)
+        {
+            try
+            {
+                return _pool.<#=name#>s[id];
+            }
+            catch (KeyNotFoundException)
+            {
+
+                return null;
+                
+            }
+           
+        }
+
+        protected override IEnumerable<KeyValuePair<Guid, <#=name#>>> GetItemsTyped(IEnumerable<Guid> id)
+        {
+            return id.Select(k => new KeyValuePair<Guid, <#=name#>>(k, _pool.<#=name#>s[k])).ToArray();
+        }
+	     
+    }
+}
+
+
+<#
+}
+ fileManager.Process();
+
+#>      

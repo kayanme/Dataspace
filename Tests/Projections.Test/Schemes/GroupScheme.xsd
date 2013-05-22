@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="GroupTest"
+    targetNamespace="http://tempuri.org/GroupScheme"
+    elementFormDefault="qualified"
+    xmlns=""
+    xmlns:b="http://metaspace.org/DataSchema"
+    xmlns:mstns="http://tempuri.org/GroupScheme"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:import namespace ="http://metaspace.org/DataSchema"/>
+
+  <xs:element name="ElementGroup">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Element">
+          <xs:complexType>            
+              <xs:complexContent>
+                <xs:extension base="b:Element">
+                  <xs:sequence>
+                    <xs:element name="AttributeGroup">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="AttributeSubGroup">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Attribute">
+                                  <xs:complexType>
+                                    <xs:complexContent>
+                                      <xs:extension base="b:Attribute">
+                                        <xs:attribute name="Name"/>
+                                      </xs:extension>
+                                    </xs:complexContent>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                              <xs:attribute name="Name"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="Name"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="Name"/>
+                </xs:extension>
+              </xs:complexContent>
+          </xs:complexType>        
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="Name"/>
+      <xs:attribute name="Id" type="b:Guid"/>
+    </xs:complexType>
+  </xs:element>
+           
+  
+</xs:schema>

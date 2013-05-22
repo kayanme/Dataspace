@@ -1,0 +1,82 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+
+using System.Xml.Schema;
+using System.IO;
+using System.ComponentModel.Composition;
+using Dataspace.Common.Interfaces;
+
+namespace Server.Modules.ProdStructureModule
+{
+  [Export(typeof(ISchemeProvider))]
+  internal class BaseScheme:ISchemeProvider
+  {
+   
+     private const string ReadScheme = "<#= 
+	     System.IO.File.ReadAllText( 
+	        System.IO.Path.GetDirectoryName(this.Host.TemplateFile) + "\\BaseScheme.xsd").Replace("\r","").Replace("\n","").Replace("\"","\\\"")#>";	    
+
+
+     public XmlSchema GetReadScheme()
+	 {	  
+        return XmlSchema.Read(new StringReader(ReadScheme),(o,e)=> { });	  
+	 }    
+  }
+
+  [Export(typeof(ISchemeProvider))]
+  internal class FilterScheme:ISchemeProvider
+  {
+   
+     private const string ReadScheme = "<#= 
+	     System.IO.File.ReadAllText( 
+	        System.IO.Path.GetDirectoryName(this.Host.TemplateFile) + "\\NamefilterScheme.xsd").Replace("\r","").Replace("\n","").Replace("\"","\\\"")#>";	    
+
+
+     public XmlSchema GetReadScheme()
+	 {
+	  
+        return XmlSchema.Read(new StringReader(ReadScheme),(o,e)=> { });
+	  
+	 }
+
+
+    
+
+  }
+  
+  
+  [Export(typeof(ISchemeProvider))]
+  internal class GroupScheme:ISchemeProvider
+  {
+   
+     private const string ReadScheme = "<#= 
+	     System.IO.File.ReadAllText( 
+	        System.IO.Path.GetDirectoryName(this.Host.TemplateFile) + "\\GroupScheme.xsd").Replace("\r","").Replace("\n","").Replace("\"","\\\"")#>";	    
+
+
+     public XmlSchema GetReadScheme()
+	 {
+	  
+        return XmlSchema.Read(new StringReader(ReadScheme),(o,e)=> { });
+	  
+	 }    
+  }
+
+  [Export(typeof(ISchemeProvider))]
+  internal class NameGroupsScheme:ISchemeProvider
+  {
+   
+     private const string ReadScheme = "<#= 
+	     System.IO.File.ReadAllText( 
+	        System.IO.Path.GetDirectoryName(this.Host.TemplateFile) + "\\NamefilterSchemeWithGroups.xsd").Replace("\r","").Replace("\n","").Replace("\"","\\\"")#>";	    
+
+
+     public XmlSchema GetReadScheme()
+	 {
+	  
+        return XmlSchema.Read(new StringReader(ReadScheme),(o,e)=> { });
+	  
+	 }    
+  }
+  
+}

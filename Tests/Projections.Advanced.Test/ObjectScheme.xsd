@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ObjectScheme"
+    targetNamespace="http://metaspace.org/DataSchema"
+    elementFormDefault="qualified"
+    xmlns="http://metaspace.org/ObjectScheme" 
+    xmlns:q="http://metaspace.org/QueryScheme" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:import namespace="http://metaspace.org/DataSchema"/>
+  
+  <xs:simpleType name="Guid">  
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[{(]?[0-9A-Fa-f]{8}\-?[0-9A-Fa-f]{4}\-?[0-9A-Fa-f]{4}\-?[0-9A-Fa-f]{4}\-?[0-9A-Fa-f]{12}[})]?|([!$])(\(var|\(loc|\(wix)\.[_A-Za-z][0-9A-Za-z_.]*\)" />
+      
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="ISPType">    
+    <xs:annotation>
+      <xs:documentation>main.ISPType</xs:documentation>
+    </xs:annotation>
+    <xs:attributeGroup ref="q:IspTypeGroup"/>
+    <xs:attribute name ="Id" type ="Guid" use ="required" />
+    
+  </xs:complexType>
+  
+</xs:schema>

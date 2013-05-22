@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema   
+    targetNamespace="http://metaspace.org/QueryScheme"
+    elementFormDefault="qualified"
+    xmlns="http://metaspace.org/QueryScheme"     
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:attribute  name="queryProperty" type="xs:string"/>   
+  
+  <xs:attributeGroup name="IspTypeGroup">
+    <xs:attribute ref="queryProperty"/>
+  </xs:attributeGroup>
+</xs:schema>

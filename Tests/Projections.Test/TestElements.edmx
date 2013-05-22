@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="TestElements.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2005" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityContainer Name="TestElementsTargetContainer">
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="TestElements" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="TestElementsContainer" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+          <EntitySet Name="ElementSet" EntityType="TestElements.Element" />
+          <EntitySet Name="AttributeSet" EntityType="TestElements.Attribute" />
+          <EntitySet Name="ValueSet" EntityType="TestElements.Value" />
+          <AssociationSet Name="ElementAttribute" Association="TestElements.ElementAttribute">
+            <End Role="Element" EntitySet="ElementSet" />
+            <End Role="Attribute" EntitySet="AttributeSet" />
+          </AssociationSet>
+          <AssociationSet Name="AttributeValue" Association="TestElements.AttributeValue">
+            <End Role="Attribute" EntitySet="AttributeSet" />
+            <End Role="Value" EntitySet="ValueSet" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Element">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Guid" Name="Id" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <NavigationProperty Name="Attribute" Relationship="TestElements.ElementAttribute" FromRole="Element" ToRole="Attribute" />
+        </EntityType>
+        <EntityType Name="Attribute">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Guid" Name="Id" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <NavigationProperty Name="Element" Relationship="TestElements.ElementAttribute" FromRole="Attribute" ToRole="Element" />
+          <Property Type="Guid" Name="ElementId" Nullable="false" />
+          <NavigationProperty Name="Value" Relationship="TestElements.AttributeValue" FromRole="Attribute" ToRole="Value" />
+        </EntityType>
+        <EntityType Name="Value">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Guid" Name="Id" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <NavigationProperty Name="Attribute" Relationship="TestElements.AttributeValue" FromRole="Value" ToRole="Attribute" />
+          <Property Type="Guid" Name="AttributeId" Nullable="false" />
+        </EntityType>
+        <Association Name="ElementAttribute">
+          <End Type="TestElements.Element" Role="Element" Multiplicity="1" />
+          <End Type="TestElements.Attribute" Role="Attribute" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Element">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Attribute">
+              <PropertyRef Name="ElementId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="AttributeValue">
+          <End Type="TestElements.Attribute" Role="Attribute" Multiplicity="1" />
+          <End Type="TestElements.Value" Role="Value" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Attribute">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Value">
+              <PropertyRef Name="AttributeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <Alias Key="Model" Value="TestElements" />
+        <Alias Key="Target" Value="TestElements.Store" />
+        <EntityContainerMapping CdmEntityContainer="TestElementsContainer" StorageEntityContainer="TestElementsTargetContainer">
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer>
+    <edmx:Connection>
+      <DesignerInfoPropertySet xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram Name="TestElements" xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+        <EntityTypeShape EntityType="TestElements.Element" Width="1.5" PointX="1.5" PointY="1.625" Height="1.2761848809321723" />
+        <EntityTypeShape EntityType="TestElements.Attribute" Width="1.5" PointX="3.75" PointY="1.625" Height="1.2761848809321723" />
+        <EntityTypeShape EntityType="TestElements.Value" Width="1.5" PointX="6.25" PointY="1.625" Height="1.2761848809321723" />
+        <AssociationConnector Association="TestElements.ElementAttribute">
+          <ConnectorPoint PointX="3" PointY="2.3465234285593031" />
+          <ConnectorPoint PointX="3.75" PointY="2.3465234285593031" />
+        </AssociationConnector>
+        <AssociationConnector Association="TestElements.AttributeValue">
+          <ConnectorPoint PointX="5.25" PointY="2.4299544166525209" />
+          <ConnectorPoint PointX="6.25" PointY="2.4299544166525209" />
+        </AssociationConnector>
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,64 @@
+﻿<#@ template  language="C#"  debug="true" hostSpecific="true" #>
+<#@ include file="EF.Utility.CS.ttinclude"#>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#
+CodeGenerationTools code = new CodeGenerationTools(this);
+MetadataLoader loader = new MetadataLoader(this);
+CodeRegion region = new CodeRegion(this, 1);
+MetadataTools ef = new MetadataTools(this);
+
+string inputFile = @"..\TestElements.edmx";
+EdmItemCollection ItemCollection = loader.CreateEdmItemCollection(inputFile);
+string namespaceName = code.VsNamespaceSuggestion();
+
+ #>
+ //*********************************************************
+//
+//    Copyright (c) Microsoft. All rights reserved.
+//    This code is licensed under the Microsoft Public License.
+//    THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+//    ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+//    IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+//    PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+
+using System;
+using System.Collections.Generic;
+
+using System.ComponentModel.Composition;
+using System.Diagnostics.Contracts;
+using System.Linq;
+
+namespace  <#=namespaceName#>
+
+{
+    [Export]
+    public class ResourcePool 
+    {
+
+ <#
+
+foreach (EntityType entity in ItemCollection.GetItems<EntityType>()
+											.Where(e=>Accessibility.ForType(e).ToUpper()!="INTERNAL")										  
+                                            .OrderBy(e => e.Name))
+{   
+	 var name =  code.Escape(entity.Name);
+#>
+        internal Dictionary<Guid,<#=name#>>  <#=name#>s = new Dictionary<Guid,<#=name#>>();   
+<#
+}
+#>      
+   }
+	
+	  
+}
+<#
+  
+#>

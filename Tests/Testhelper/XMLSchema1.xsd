@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="XMLSchema1"
+    targetNamespace="http://Lazy.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://Lazy.xsd"
+    xmlns:mstns="http://Lazy.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:complexType name="CupCounter">   
+    <xs:attribute name="Id" type="xs:ID" />
+    <xs:attribute name="Name" type="xs:string"/>
+    <xs:attribute name="CupCount" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="Department">
+    <xs:sequence>
+      <xs:element name="CupCounter" type="CupCounter"/>
+    </xs:sequence>
+    <xs:attribute name="Id" type="xs:ID" />
+    <xs:attribute name="Name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="Programmer">
+    <xs:sequence>
+      <xs:element name="Department" type="Department"/>
+    </xs:sequence>
+    <xs:attribute name="Id" type="xs:ID" />
+    <xs:attribute name="Name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:element name="Department" type="Department"/>
+  <xs:element name="Programmer" type="Programmer"/>
+  
+</xs:schema>

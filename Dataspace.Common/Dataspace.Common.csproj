@@ -1,0 +1,247 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{355B2601-806C-44A5-94C2-9F247B8F337D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Dataspace.Common</RootNamespace>
+    <AssemblyName>Dataspace.Common</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\BuildSln\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsRunCodeAnalysis>False</CodeContractsRunCodeAnalysis>
+    <CodeContractsNonNullObligations>False</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>False</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>False</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>False</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>False</CodeContractsRedundantAssumptions>
+    <CodeContractsInferRequires>False</CodeContractsInferRequires>
+    <CodeContractsInferEnsures>False</CodeContractsInferEnsures>
+    <CodeContractsInferObjectInvariants>False</CodeContractsInferObjectInvariants>
+    <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
+    <CodeContractsSuggestRequires>True</CodeContractsSuggestRequires>
+    <CodeContractsSuggestEnsures>False</CodeContractsSuggestEnsures>
+    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
+    <CodeContractsDisjunctiveRequires>False</CodeContractsDisjunctiveRequires>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>False</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>True</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>False</CodeContractsCacheAnalysisResults>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>1</CodeContractsAnalysisWarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>..\IndusoftRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>..\IndusoftRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>..\IndusoftRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>..\IndusoftRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Announcements\CombinedSubscriptionToken.cs" />
+    <Compile Include="Announcements\SecurityUpdate.cs" />
+    <Compile Include="Attributes\ActivationSwitchAttribute.cs" />
+    <Compile Include="Attributes\CachingPolicies\DependentQueriedCachingAttribute.cs" />
+    <Compile Include="Attributes\CachingPolicies\SimpleCachingAttribute.cs" />
+    <Compile Include="Attributes\QueryNamespaceAttribute.cs" />
+    <Compile Include="Attributes\SecuritizedAttribute.cs" />
+    <Compile Include="ClassesForImplementation\AnnouncerDownlink.cs" />
+    <Compile Include="ClassesForImplementation\AnnouncerUplink.cs" />
+    <Compile Include="ClassesForImplementation\Security\SecurityContextFactory.cs" />
+    <Compile Include="ClassesForImplementation\Security\SecurityProvider.cs" />
+    <Compile Include="ClassesForImplementation\Security\ISecurityContext.cs" />
+    <Compile Include="ClassesForImplementation\PropertiesProvider.cs" />
+    <Compile Include="Data\ResourceType.cs" />
+    <Compile Include="Data\Settings.cs" />
+    <Compile Include="Data\UriQuery.cs" />
+    <Compile Include="Exceptions\PostException.cs" />
+    <Compile Include="Interfaces\IAnnouncerSubscriptor.cs" />
+    <Compile Include="Interfaces\ICacheServicing.cs" />
+    <Compile Include="Interfaces\ICacheUnactualityNotifier.cs" />
+    <Compile Include="Interfaces\IDefaultSecurityProvider.cs" />
+    <Compile Include="Interfaces\Internal\IAnnouncerSubscriptorInt.cs" />
+    <Compile Include="Interfaces\Internal\IInitialize.cs" />
+    <Compile Include="Interfaces\ISchemeControlling.cs" />
+    <Compile Include="Interfaces\ISecurityUpdater.cs" />
+    <Compile Include="ParsingServices\Classic Parsers\ArrayParser.cs" />
+    <Compile Include="ParsingServices\Classic Parsers\BoolParser.cs" />
+    <Compile Include="ParsingServices\Classic Parsers\DateTimeParser.cs" />
+    <Compile Include="ParsingServices\Classic Parsers\GuidParser.cs" />
+    <Compile Include="ParsingServices\Classic Parsers\NullableGuidParser.cs" />
+    <Compile Include="ParsingServices\Classic Parsers\NumParsers.cs" />
+    <Compile Include="ParsingServices\Classic Parsers\StringParser.cs" />
+    <Compile Include="ParsingServices\Parser.cs" />
+    <Compile Include="ParsingServices\ParsingBlock.cs" />
+    <Compile Include="ParsingServices\UniversalBaseTypeParser.cs" />
+    <Compile Include="Projections\Classes\Plan\ParameterNames.cs" />
+    <Compile Include="Projections\Classes\Plan\ParametersMapping.cs" />
+    <Compile Include="Projections\Classes\Plan\PlanStep.cs" />
+    <Compile Include="Projections\Classes\Descriptions\ProjectionElement.cs" />
+    <Compile Include="Projections\Classes\Descriptions\Relation.cs" />
+    <Compile Include="Projections\Classes\Descriptions\ResourceProjectionElement.cs" />
+    <Compile Include="Projections\Classes\Descriptions\CommendationCollection.cs" />
+    <Compile Include="Projections\Classes\Descriptions\TestDescription.cs" />
+    <Compile Include="Projections\Classes\FilledProjectionFrame.cs" />
+    <Compile Include="Projections\Classes\Descriptions\FillingInfo.cs" />
+    <Compile Include="Projections\Classes\FrameNode.cs" />
+    <Compile Include="Projections\Classes\FrameNodeGroup.cs" />
+    <Compile Include="Projections\Classes\Plan\FramingPlan.cs" />
+    <Compile Include="Projections\Classes\Plan\TestPlanStep.cs" />
+    <Compile Include="Projections\Classes\ProjectionFrame.cs" />
+    <Compile Include="Projections\Classes\Plan\TestFramingPlan.cs" />
+    <Compile Include="Projections\Classes\Utilities\NetSolving.cs" />
+    <Compile Include="Projections\Services\PlanBuilding\AccumulatorFactory.cs" />
+    <Compile Include="Projections\Services\PlanBuilding\BoundingParameter.cs" />
+    <Compile Include="Projections\Services\PlanBuilding\FramingPlanBuilder.cs" />
+    <Compile Include="Projections\Services\PlanBuilding\PrimaryFrameNode.cs" />
+    <Compile Include="Projections\Services\PlanBuilding\SecondaryFrameNode.cs" />
+    <Compile Include="Projections\Services\PlanFiller.cs" />
+    <Compile Include="Projections\Services\Writers\ProjectionWriter.cs" />
+    <Compile Include="Projections\Services\Streamer.cs" />
+    <Compile Include="Projections\Services\Writers\XmlStreamer.cs" />
+    <Compile Include="Projections\Services\Writers\XmlWriter.cs" />
+    <Compile Include="Projections\Storages\ProjectionStorage.cs" />
+    <Compile Include="Projections\Storages\RegistrationStorage.cs" />
+    <Compile Include="Projections\Storages\SchemaBuilders\DataSchemaBuilder.cs" />
+    <Compile Include="Projections\Storages\SchemaStorage.cs" />
+    <Compile Include="Projections\Services\ProjectionBuilder.cs" />
+    <Compile Include="Projections\Queries\HierarchyQuery.cs" />
+    <Compile Include="Projections\Queries\ProcessorQuery.cs" />
+    <Compile Include="Interfaces\IProjectionsCollector.cs" />
+    <Compile Include="Interfaces\Internal\InterchangeCachier.cs" />
+    <Compile Include="Interfaces\ISchemeReader.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Attributes\CachingDataAttribute.cs" />
+    <Compile Include="Attributes\CachingPolicies\CachingPolicyAttribute.cs" />
+    <Compile Include="Attributes\CachingPolicies\DependentCachingAttribute.cs" />
+    <Compile Include="Attributes\CachingPolicies\ExplicitUpdateCachingAttribute.cs" />
+    <Compile Include="Attributes\CachingPolicies\VersionedCachingAttribute.cs" />
+    <Compile Include="Attributes\IsQueryAttribute.cs" />
+    <Compile Include="Attributes\ResourceAttribute.cs" />
+    <Compile Include="Announcements\AnnouncerSubscriptor.cs" />
+    <Compile Include="Data\ResourceDescription.cs" />
+    <Compile Include="Security\SecurityManager.cs" />
+    <Compile Include="Security\SecurityToken.cs" />
+    <Compile Include="Services\AppConfigProvider.cs" />
+    <Compile Include="Services\CompositionService.cs" />
+    <Compile Include="Services\DataStore.cs" />
+    <Compile Include="Services\DefaultFabrica.cs" />
+    <Compile Include="Services\Initializer.cs" />
+    <Compile Include="Projections\Storages\QueryStorage.cs" />
+    <Compile Include="Services\ServiceComponent.cs" />
+    <Compile Include="Services\SettingsHolder.cs" />
+    <Compile Include="Services\TransitionStorage.cs" />
+    <Compile Include="Statistics\Actions.cs" />
+    <Compile Include="Statistics\Events\CachedGetEvent.cs" />
+    <Compile Include="Statistics\Events\ExternalGetEvent.cs" />
+    <Compile Include="Statistics\Events\ExternalSerialGetEvent.cs" />
+    <Compile Include="Statistics\Events\PostEvent.cs" />
+    <Compile Include="Statistics\Events\RebalanceEvent.cs" />
+    <Compile Include="Statistics\Events\UnactualEvent.cs" />
+    <Compile Include="Statistics\IStatChannel.cs" />
+    <Compile Include="Statistics\IStatisticsSubscriber.cs" />
+    <Compile Include="Statistics\StatChannel.cs" />
+    <Compile Include="Statistics\Events\StatisticEvent.cs" />
+    <Compile Include="Statistics\StatisticsCollector.cs" />
+    <Compile Include="Statistics\Subscribers\DebugLogger.cs" />
+    <Compile Include="Transactions\TransactedResourceManager.cs" />
+    <Compile Include="Transactions\TransactedUpdatesStorage.cs" />
+    <Compile Include="Utility\Accumulator.cs" />
+    <Compile Include="Utility\CachierExtensions.cs" />
+    <Compile Include="ClassesForImplementation\ResourceRegistrator.cs" />
+    <Compile Include="ClassesForImplementation\ResourceGetter.cs" />
+    <Compile Include="ClassesForImplementation\ResourceQuerier.cs" />
+    <Compile Include="ClassesForImplementation\ResourcePoster.cs" />
+    <Compile Include="Services\CurrentCachierStorage.cs" />
+    <Compile Include="Interfaces\ICachierStorage.cs" />
+    <Compile Include="Interfaces\IResourceGetterFactory.cs" />
+    <Compile Include="Interfaces\IResourceQuerierFactory.cs" />
+    <Compile Include="Interfaces\IResourcePosterFactory.cs" />
+    <Compile Include="Interfaces\IGenericPool.cs" />
+    <Compile Include="Interfaces\ITypedPool.cs" />
+    <Compile Include="ClassesForImplementation\QueryProcessor.cs" />
+    <Compile Include="Announcements\SubscriptionToken.cs" />
+    <Compile Include="Services\TransientCacher.cs" />
+    <Compile Include="Announcements\UnactualResourceContent.cs" />
+    <Compile Include="Utilities.cs" />
+    <Compile Include="Utility\AccumulatingProvider.cs" />
+    <Compile Include="Utility\Dictionary\GuidComparer.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\CacheNode.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancer.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\SecondLevelCache.cs" />
+    <Compile Include="Utility\Dictionary\UpdatableElement.cs" />
+    <Compile Include="Utility\Dictionary\UpgradedCache.cs" />
+    <Compile Include="Utility\IndexedCollection\ExpressionTreeComparer.cs" />
+    <Compile Include="Utility\IndexedCollection\IndexedCollection.cs" />
+    <Compile Include="Utility\XDocComparer.cs" />
+    <Compile Include="Utility\XmlBuilder.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

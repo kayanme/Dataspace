@@ -1,0 +1,76 @@
+﻿<#@ template  language="C#"  debug="true" hostSpecific="true" #>
+<#@ include file="EF.Utility.CS.ttinclude"#>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#
+CodeGenerationTools code = new CodeGenerationTools(this);
+MetadataLoader loader = new MetadataLoader(this);
+CodeRegion region = new CodeRegion(this, 1);
+MetadataTools ef = new MetadataTools(this);
+
+string inputFile = @"..\TestElements.edmx";
+EdmItemCollection ItemCollection = loader.CreateEdmItemCollection(inputFile);
+string namespaceName = code.VsNamespaceSuggestion();
+
+ #>
+ //*********************************************************
+//
+//    Copyright (c) Microsoft. All rights reserved.
+//    This code is licensed under the Microsoft Public License.
+//    THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+//    ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+//    IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+//    PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+
+using System;
+using System.Collections.Generic;
+
+using System.ComponentModel.Composition;
+using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Linq.Expressions;
+using Dataspace.Common.ClassesForImplementation;
+
+namespace  <#=namespaceName#>
+
+{
+    [Export(typeof(QueryProcessor))]
+    public class QueryProc : QueryProcessor
+    {
+#pragma warning disable 0649
+ 	   [Import]
+	   private ResourcePool _resourcePool;
+#pragma warning restore 0649
+       public override IEnumerable<T> GetItems<T>(Expression<Func<T, bool>> predicate) 
+	   {
+ <#
+
+foreach (EntityType entity in ItemCollection.GetItems<EntityType>()
+											.Where(e=>Accessibility.ForType(e).ToUpper()!="INTERNAL")										  
+                                            .OrderBy(e => e.Name))
+{   
+	 var name =  code.Escape(entity.Name);
+#>
+       if (typeof(T) == typeof(<#=name#>))
+	     {
+		   return  _resourcePool.<#=name#>s.Select(k=>k.Value).OfType<T>().Where(predicate.Compile()).ToArray();
+		 }
+<#
+}
+#>      
+       throw new ArgumentException();
+        }
+   }
+	
+	  
+}
+<#
+  
+#>

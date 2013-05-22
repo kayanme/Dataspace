@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RootEntity name="bla" 
+  xmlns="http://tempuri.org/DataSchemer.xsd" 
+  Id="2FB91D8C-85DB-4C2D-92A0-5A8ED0E907D2"
+ >
+  <NonIspNode>
+    <DescendantEntity Id="5CC4744E-AB28-4577-8E5A-3313BB4E861B" name="11">
+       <NonIspNode/>
+    </DescendantEntity>
+    <DescendantEntity Id="C176C6C5-AD1A-4199-8A30-B22C41B4BD87" name="22">
+      <NonIspNode>
+        <DescendantEntity Id="C81D3E8C-FE1B-4CDF-B6E8-9EB6DAD31A8E" name="33">
+          <NonIspNode/>
+        </DescendantEntity>
+      </NonIspNode>
+    </DescendantEntity>
+  </NonIspNode>
+</RootEntity>

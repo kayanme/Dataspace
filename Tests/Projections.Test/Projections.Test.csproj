@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E690346E-368F-4F70-BEC2-28263D5FCC79}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Projections.Test</RootNamespace>
+    <AssemblyName>Projections.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\..\BuildSln\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
+      <Visible>False</Visible>
+    </CodeAnalysisDependentAssemblyPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\Attribute.cs">
+      <DependentUpon>TestModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\AttributePoster.cs">
+      <DependentUpon>WriterTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\AttributeProvider.cs">
+      <DependentUpon>ProviderTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\AttributeQuerier.cs">
+      <DependentUpon>TestQueryGenerator.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\AttributeQuerierPart.cs" />
+    <Compile Include="Data\BaseSchemeDataProvider.cs" />
+    <Compile Include="Data\Element.cs">
+      <DependentUpon>TestModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ElementPoster.cs">
+      <DependentUpon>WriterTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ElementProvider.cs">
+      <DependentUpon>ProviderTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ElementQuerier.cs">
+      <DependentUpon>TestQueryGenerator.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ElementQuerierPart.cs" />
+    <Compile Include="Data\GroupSchemeDataProvider.cs" />
+    <Compile Include="Data\PoolGenerator.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PoolGenerator.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ProviderTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProviderTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\QueryProc.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>QueryProc.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ValuePoster.cs">
+      <DependentUpon>WriterTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ValueProvider.cs">
+      <DependentUpon>ProviderTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ValueQuerierPart.cs" />
+    <Compile Include="Data\WriterTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>WriterTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Defaults\Factory.cs" />
+    <Compile Include="Defaults\Querier.cs" />
+    <Compile Include="Defaults\Writer.cs" />
+    <Compile Include="UnitTests\CommendationCollectionTest.cs" />
+    <Compile Include="UnitTests\NetUtilitiesTest.cs" />
+    <Compile Include="UnitTests\PlanBuilderTests.cs" />
+    <Compile Include="UnitTests\PlanLoaderTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Registrator.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Registrator.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Schemes\Scheme.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Scheme.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\TestModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\TestQueryGenerator.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestQueryGenerator.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Tests.cs" />
+    <Compile Include="Data\Value.cs">
+      <DependentUpon>TestModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ValueQuerier.cs">
+      <DependentUpon>TestQueryGenerator.tt</DependentUpon>
+    </Compile>
+    <Compile Include="UnitTests\TestWriter.cs" />
+    <Compile Include="UnitTests\PlanProcessorTests.cs" />
+    <Compile Include="UnitTests\QuerySelectorTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Indusoft.Common.ResourceLayer\Dataspace.Common.csproj">
+      <Project>{355B2601-806C-44A5-94C2-9F247B8F337D}</Project>
+      <Name>Dataspace.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Indusoft.Testhelper\Testhelper.csproj">
+      <Project>{3EEBC5DA-8FEB-4C78-A6FA-531175E96715}</Project>
+      <Name>Testhelper</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EntityDeploy Include="TestElements.edmx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.Config" />
+    <None Include="Data\PoolGenerator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PoolGenerator.cs</LastGenOutput>
+    </None>
+    <None Include="Data\ProviderTemplate.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ProviderTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="Data\QueryProc.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>QueryProc.cs</LastGenOutput>
+    </None>
+    <None Include="Data\WriterTemplate.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>WriterTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Registrator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Registrator.cs</LastGenOutput>
+    </None>
+    <None Include="Data\TestModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestModel.cs</LastGenOutput>
+    </None>
+    <None Include="Data\TestQueryGenerator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestQueryGenerator.cs</LastGenOutput>
+    </None>
+    <EmbeddedResource Include="Schemes\BaseScheme.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="Schemes\NamefilterSchemeWithGroups.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Schemes\GroupScheme.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Schemes\NamefilterScheme.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Schemes\Scheme.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Scheme.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

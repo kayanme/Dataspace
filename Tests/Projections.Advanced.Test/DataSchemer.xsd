@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSchemer"
+    targetNamespace="http://tempuri.org/DataSchemer.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/DataSchemer.xsd"   
+    xmlns:o="http://metaspace.org/ObjectScheme"   
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>   
+  
+    <xs:import namespace ="http://metaspace.org/ObjectScheme"/>
+  
+    <xs:complexType name="DataType">
+      <xs:complexContent>
+        <xs:extension base ="o:ISPType">
+          <xs:sequence>
+            <xs:element name="NonIspNode" minOccurs="0" maxOccurs="1">
+              <xs:complexType>               
+                <xs:sequence>
+                  <xs:element name="DescendantEntity" type="DataType" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>             
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="name"/>
+        </xs:extension>
+      </xs:complexContent>       
+    </xs:complexType>
+  
+  <xs:element name="RootEntity" type="DataType"/>
+ 
+</xs:schema>

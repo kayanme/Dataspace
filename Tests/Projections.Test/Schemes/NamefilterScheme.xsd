@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="NamefilterScheme"
+    targetNamespace="http://tempuri.org/Namefilter"
+    elementFormDefault="qualified"
+    xmlns=""
+    xmlns:b="http://metaspace.org/DataSchema"
+    xmlns:mstns="http://tempuri.org/Namefilter"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:import namespace ="http://metaspace.org/DataSchema"/>
+
+  <xs:element name="Element">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="b:Element">
+          <xs:sequence>
+            <xs:element name="Value" type="mstns:Value"/>
+          </xs:sequence>
+          <xs:attribute name="Name" />        
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="Value" type="mstns:Value"/>
+  
+  <xs:complexType name="Value">
+    <xs:complexContent>
+      <xs:extension base="b:Value">
+        <xs:sequence>
+          <xs:element name="Element">
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension base="b:Element">
+                  <xs:sequence>
+                    <xs:element name="Attribute">
+                      <xs:complexType>
+                        <xs:complexContent>
+                          <xs:extension base="b:Attribute">
+                            <xs:attribute name="Name" />                          
+                          </xs:extension>
+                        </xs:complexContent>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="Name" />                
+                </xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="Name" />        
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+</xs:schema>
