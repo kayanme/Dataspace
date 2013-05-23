@@ -1,0 +1,56 @@
+﻿<#
+//*********************************************************
+//
+//    Copyright (c) Microsoft. All rights reserved.
+//    This code is licensed under the Microsoft Public License.
+//    THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+//    ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+//    IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+//    PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+#>
+<#@ template language="C#" debug="false" hostspecific="true"#>
+<#@ include file="EF.Utility.CS.ttinclude"#>
+<#@ output extension=".cs"#>
+using System;
+using System.ComponentModel.Composition;
+using Dataspace.Common.ClassesForImplementation;
+using Dataspace.Over.EntityFramework.Examples;
+
+[Export(typeof(ResourceRegistrator))]
+internal class CoreResourceRegistrator:ResourceRegistrator
+{
+
+     protected override Type[] ResourceTypes { 
+	    get
+		  { 
+		     return new[] {
+<#
+CodeGenerationTools code = new CodeGenerationTools(this);
+MetadataLoader loader = new MetadataLoader(this);
+CodeRegion region = new CodeRegion(this, 1);
+MetadataTools ef = new MetadataTools(this);
+
+string inputFile = @"ResourcesModel.edmx";
+EdmItemCollection ItemCollection = loader.CreateEdmItemCollection(inputFile);
+string namespaceName = code.VsNamespaceSuggestion();
+
+EntityFrameworkTemplateFileManager fileManager = EntityFrameworkTemplateFileManager.Create(this);
+
+// Emit Entity Types
+foreach (EntityType entity in ItemCollection.GetItems<EntityType>()
+                                            .OrderBy(e => e.Name)
+											.Where(e=>!e.Abstract 
+											))
+{
+	if (Accessibility.ForType(entity).ToUpper()=="INTERNAL")
+	{
+		continue;
+	}#>
+                              typeof(<#=code.Escape(entity)#>),
+<#
+}#>                       };
+         }
+    }
+}

@@ -1,0 +1,171 @@
+﻿<#@ template  language="C#"  debug="true" hostSpecific="true" #>
+<#@ include file="EF.Utility.CS.ttinclude"#>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#
+CodeGenerationTools code = new CodeGenerationTools(this);
+MetadataLoader loader = new MetadataLoader(this);
+CodeRegion region = new CodeRegion(this, 1);
+MetadataTools ef = new MetadataTools(this);
+
+string inputFile = @"ResourcesModel.edmx";
+EdmItemCollection ItemCollection = loader.CreateEdmItemCollection(inputFile);
+string namespaceName = code.VsNamespaceSuggestion();
+
+EntityFrameworkTemplateFileManager fileManager = EntityFrameworkTemplateFileManager.Create(this);
+ fileManager.StartHeader();
+ #>
+ //*********************************************************
+//
+//    
+//    THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+//    ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+//    IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+//    PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+ <#
+
+
+
+ fileManager.EndBlock();
+
+
+foreach (EntityType entity in ItemCollection.GetItems<EntityType>()
+											.Where(e=>Accessibility.ForType(e).ToUpper()!="INTERNAL")										    
+                                            .OrderBy(e => e.Name))
+{
+     var entityName = entity.Name;
+     fileManager.StartNewFile(entityName + "Querier.cs");
+	 var pkey = entity.KeyMembers.First().Name;
+#>
+using System;
+using System.Collections.Generic;
+using Dataspace.Common.Attributes;
+using Dataspace.Common.ClassesForImplementation;
+using System.ComponentModel.Composition;
+using System.Diagnostics.Contracts;
+using System.Linq;
+
+namespace  <#=namespaceName#>
+
+{
+    [Export(typeof(ResourceQuerier))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    [Pure]
+    public partial class <#=code.Escape(entityName)#>Querier : ResourceQuerier<<#=code.Escape(entityName)#>> 
+    {
+	#pragma warning disable 0649
+	      [Import]
+		  private QueryProcessor _queryProc;
+#pragma warning restore 0649
+	      [IsQuery]
+		  public IEnumerable<Guid> GetAllOfThis()
+		  {
+			  return _queryProc.GetItems<<#=code.Escape(entityName)#>>(k=>true).Select(k=>k.<#=code.Escape(pkey)#>).ToArray();
+		  }
+
+<#
+		 var i = 4;
+         for (var o = entity;i>0 && o!=null && o.Name != "BaseEntity";o = o.BaseType as EntityType)
+		 {
+		     i--;
+			
+		     if (entity.Name == "BaseEntity") continue;
+			
+			 var props = o.Properties					
+						       .Where(p => p.TypeUsage.EdmType is PrimitiveType 
+							            && p.DeclaringType == o	                      
+	                                    && p.Name != o.KeyMembers.First().Name)
+						       .Where(p =>  p.Name != "ObjectTypeId")
+						       .OrderBy(k=>k.Name == o.KeyMembers.First().Name);
+
+             foreach (EdmProperty prop in props)
+	         {
+			   var type = prop.TypeUsage.EdmType.Name;
+               var name =  prop.Name.ToLower();
+#>			
+          [IsQuery]
+		  public IEnumerable<Guid> GetMultipleBy<#=prop.Name#>(<#=code.Escape(type)#>  <#=code.Escape(name)#>)
+		  {
+		      return _queryProc.GetItems<<#=code.Escape(entityName)#>>(k=>k.<#=code.Escape(prop.Name)#> == <#=code.Escape(prop.Name.ToLower())#>).Select(k=>k.<#=code.Escape(pkey)#>).ToArray();
+		  }
+<# 
+          if (name!=TrimId(name))
+		  {
+            var trimmedName =  TrimId(name);
+#>
+		    [IsQuery]
+		   public IEnumerable<Guid> GetMultipleBy<#=trimmedName#>(<#=code.Escape(type)#>  <#=code.Escape(trimmedName)#>)
+		  {
+		      return GetMultipleBy<#=prop.Name#>(<#=code.Escape(trimmedName)#>);
+		  }
+<#
+          }
+             }
+          
+
+
+		  foreach (NavigationProperty navProp in entity.NavigationProperties
+		                                               .Where(k=>k.FromEndMember.RelationshipMultiplicity == RelationshipMultiplicity.One)
+													   .Where(k=>k.DeclaringType == o)
+													   .Where(p =>  p.Name != "ObjectType"))
+		  {
+		      var forType = navProp.ToEndMember.GetEntityType();			
+              var name =  TrimId(navProp.Name).ToLower();
+		      var forNav = forType.NavigationProperties.FirstOrDefault(k=>k.ToEndMember.GetEntityType().Name == entity.Name);
+			  if (forNav !=null)
+			  {
+			    var key = forNav.GetDependentProperties().First().Name;
+#>		
+          [IsQuery]
+		  public IEnumerable<Guid> GetSingleBy<#=code.Escape(forType.Name)#>(Guid  <#=code.Escape(forType.Name.ToLower())#>)
+		  {
+		      return new[]{ TypedPool.Get<<#=code.Escape(forType.Name)#>>(<#=code.Escape(forType.Name.ToLower())#>).<#=code.Escape(key)#>};
+		  }
+<#			
+              }
+          }
+
+		  foreach (NavigationProperty navProp in entity.NavigationProperties
+												       .Where(k=>k.DeclaringType == o)
+		                                               .Where(k=>k.FromEndMember.RelationshipMultiplicity == RelationshipMultiplicity.Many)
+													   .Where(p =>p.Name != "ObjectType"))
+		  {
+		      var forType = navProp.ToEndMember.GetEntityType();			
+              var name =  code.Escape(navProp.ToEndMember.GetEntityType().Name).ToLower();			 		   		    			 
+		      var key = code.Escape(navProp.GetDependentProperties().First().Name);				
+#>		
+		  [IsQuery]
+		  public IEnumerable<Guid> GetMultipleBy<#=name#>(Guid  <#=name#>)
+		  {
+		      return _queryProc.GetItems<<#=code.Escape(entityName)#>>(k=>k.<#=key#> == <#=name#>).Select(k=>k.<#=code.Escape(pkey)#>).ToArray();
+		  }
+<#
+             
+          }
+			
+    	}
+          
+#>   
+	}
+
+}
+<#
+           
+	
+    
+}
+ fileManager.Process();
+#>      
+<#+ 
+string TrimId(string name)
+{
+   return name;//.EndsWith("Id")? name.Substring(0,name.Length-2):name;
+}
+#>

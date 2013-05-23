@@ -57,7 +57,7 @@
     <Compile Include="TestResource.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Indusoft.Common.ResourceLayer\Dataspace.Common.csproj">
+    <ProjectReference Include="..\..\Dataspace.Common\Dataspace.Common.csproj">
       <Project>{355B2601-806C-44A5-94C2-9F247B8F337D}</Project>
       <Name>Dataspace.Common</Name>
     </ProjectReference>

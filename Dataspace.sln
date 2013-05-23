@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Projections.Advanced.Test",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources.Selector.Test", "Tests\Resources.Selector.Test\Resources.Selector.Test.csproj", "{4C860288-C87D-4286-AE1B-B6909F89B19D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataspace.Over.EntityFramework", "Dataspace.Over.EntityFramework\Dataspace.Over.EntityFramework.csproj", "{ADCC10DC-40AE-4958-A1DE-58D818029CC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataspace.Over.BLToolkit", "Dataspace.Over.BLToolkit\Dataspace.Over.BLToolkit.csproj", "{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug - MLS Compile|Any CPU = Debug - MLS Compile|Any CPU
@@ -103,6 +107,24 @@ Global
 		{4C860288-C87D-4286-AE1B-B6909F89B19D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C860288-C87D-4286-AE1B-B6909F89B19D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4C860288-C87D-4286-AE1B-B6909F89B19D}.Release|x86.ActiveCfg = Release|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Debug - MLS Compile|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Debug - MLS Compile|Any CPU.Build.0 = Debug|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Debug - MLS Compile|x86.ActiveCfg = Debug|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADCC10DC-40AE-4958-A1DE-58D818029CC5}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Debug - MLS Compile|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Debug - MLS Compile|Any CPU.Build.0 = Debug|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Debug - MLS Compile|x86.ActiveCfg = Debug|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
