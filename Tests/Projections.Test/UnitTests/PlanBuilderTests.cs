@@ -6,7 +6,7 @@ using Dataspace.Common.Projections;
 using Dataspace.Common.Projections.Classes;
 using Dataspace.Common.Projections.Classes.Descriptions;
 using Dataspace.Common.Projections.Classes.Plan;
-
+using Dataspace.Common.ServiceResources;
 using Projections.Test.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Attribute = Projections.Test.Data.Attribute;
@@ -64,23 +64,14 @@ namespace Projections.Test.UnitTests
          
         }
 
-        private ResourceQuerier.SeriesFuncWithSortedArgs MakeStubQuery(string parent, Type targetResType, params string[] args)
+        private Query MakeStubQuery(string parent, Type targetResType, params string[] args)
         {
-            return new ResourceQuerier.SeriesFuncWithSortedArgs(parent,
-                                                                                  args,
-                                                                                  (e, k) => new[] { new KeyValuePair<Guid, IEnumerable<Guid>>(Guid.Empty, new Guid[0]) },
-                                                                                  (e, k) => new[] { new KeyValuePair<Guid, IEnumerable<Guid>>(Guid.Empty, new Guid[0]) },
-                                                                                  targetResType,
-                                                                                  args.Select(a => new Func<string, object>(k => k)).ToArray());
+            return Query.CreateTestStubMultipleQuery(parent, args);
         }
 
-        private ResourceQuerier.FuncWithSortedArgs MakeStubQuery( Type targetResType, params string[] args)
+        private Query MakeStubQuery(Type targetResType, params string[] args)
         {
-            return new ResourceQuerier.FuncWithSortedArgs(args,
-                                                          (string[] e) => new Guid[0],
-                                                          (object[] e) => new Guid[0],
-                                                         targetResType,
-                                                        args.Select(a=>new Func<string, object>(k => k)).ToArray());
+            return Query.CreateTestStubQuery("",k=>k,args);
         }
 
         private void TestSerialGetters(ParameterNames parameters,int depth = -1)
@@ -133,25 +124,25 @@ namespace Projections.Test.UnitTests
             sAttr.UpRelations.Add(relation);
             sElement.DownRelations.Add(relation);
           
-            relation.SeriaQueries = new[] { attrFromElementQuery };
+            relation.Queries = new[] { attrFromElementQuery };
 
             relation = new Relation { ChildElement = sValue, ParentElement = sElement };
             sValue.UpRelations.Add(relation);
             sElement.DownRelations.Add(relation);
         
-            relation.SeriaQueries = new[] { valueFromElementQuery };
+            relation.Queries = new[] { valueFromElementQuery };
 
             relation = new Relation { ChildElement = sValue, ParentElement = sAttr };
             sValue.UpRelations.Add(relation);
             sAttr.DownRelations.Add(relation);
           
-            relation.SeriaQueries = new[] { valueFromAttrQuery };
+            relation.Queries = new[] { valueFromAttrQuery };
 
             relation = new Relation { ChildElement = sValue2, ParentElement = sValue };
             sValue2.UpRelations.Add(relation);
             sValue.DownRelations.Add(relation);
           
-            relation.SeriaQueries = new[] { elementFromValueQuery };
+            relation.Queries = new[] { elementFromValueQuery };
 
             var commendations = _tester.CheckVariantsForNodes(sElement, depth, parameters);
 

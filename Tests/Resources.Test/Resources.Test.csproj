@@ -63,11 +63,13 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccumulationDictionaryTest.cs" />
+    <Compile Include="Queries\ParamNamesTest.cs" />
+    <Compile Include="Queries\QueriesTest.cs" />
+    <Compile Include="Utility\AccumulationDictionaryTest.cs" />
     <Compile Include="Caching\BalancingTest.cs" />
     <Compile Include="Caching\ComparerCheck.cs" />
     <Compile Include="Caching\SecondLevelCacheTest2.cs" />
-    <Compile Include="IndexedCollectionTest.cs" />
+    <Compile Include="Utility\IndexedCollectionTest.cs" />
     <Compile Include="Providers\Assistant.cs" />
     <Compile Include="Providers\Factory.cs" />
     <Compile Include="Providers\Querier.cs" />

@@ -149,6 +149,7 @@
     <Compile Include="Data\ValueQuerier.cs">
       <DependentUpon>TestQueryGenerator.tt</DependentUpon>
     </Compile>
+    <Compile Include="UnitTests\RelationTests.cs" />
     <Compile Include="UnitTests\TestWriter.cs" />
     <Compile Include="UnitTests\PlanProcessorTests.cs" />
     <Compile Include="UnitTests\QuerySelectorTests.cs" />

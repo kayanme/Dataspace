@@ -38,7 +38,7 @@ namespace Projections.Test.Data
 
         [IsQuery]
         [QueryNamespace("http://tempuri.org/NamefilterWithGroups")]
-        public IEnumerable<KeyValuePair<Guid, IEnumerable<Guid>>> ByAttributeWithCustomName([Resource("Attribute")]IEnumerable<Guid> attribute, string name)
+        public IEnumerable<KeyValuePair<Guid, IEnumerable<Guid>>> ByAttributeWithCustomName(IEnumerable<Guid> attribute, string name)
         {
             return attribute.ToDictionary(k => k, k => ByAttributeWithCustomName(k, name));
         }

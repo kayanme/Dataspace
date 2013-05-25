@@ -63,10 +63,7 @@ namespace Hierarchies.Test
             Assert.AreEqual(element,relation.ParentElement);
             Assert.AreEqual("Attribute", attribute.Name);
             Assert.AreEqual("http://tempuri.org/BaseScheme", attribute.Namespace);
-            Assert.AreEqual(0, relation.Queries.Count());
-            Assert.AreEqual(0, relation.SeriaQueries.Count());
-            Assert.AreEqual(4, relation.QueriesFromPhysicalSpace.Count());
-            Assert.AreEqual(0, relation.SeriaQueriesFromPhysicalSpace.Count());
+            Assert.AreEqual(1, relation.Queries.Count());            
         }
 
         [TestMethod]
@@ -90,17 +87,14 @@ namespace Hierarchies.Test
             value = relation.ChildElement;
             Assert.AreEqual("Value", value.Name);
             Assert.AreEqual(1, value.DownRelations.Count);
-            Assert.AreEqual(2, relation.Queries.Count());
-            Assert.AreEqual(0, relation.SeriaQueries.Count());
-            Assert.AreEqual(4, relation.QueriesFromPhysicalSpace.Count());
-            Assert.AreEqual(0, relation.SeriaQueriesFromPhysicalSpace.Count());
-
+            Assert.AreEqual(1, relation.Queries.Count());
+            
             value = storage.FindElement("Value", "http://tempuri.org/Namefilter");
             Assert.AreEqual(1,value.DownRelations.Count);
             Assert.AreEqual("Element", value.DownRelations[0].ChildElement.Name);
             Assert.AreEqual(1, value.DownRelations[0].ChildElement.DownRelations.Count);
             Assert.AreEqual("Attribute", value.DownRelations[0].ChildElement.DownRelations[0].ChildElement.Name);
-            Assert.AreEqual(2, value.DownRelations[0].ChildElement.DownRelations[0].Queries.Count());
+            Assert.AreEqual(3, value.DownRelations[0].ChildElement.DownRelations[0].Queries.Count());
         }
 
 

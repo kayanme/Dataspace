@@ -7,6 +7,7 @@ using Dataspace.Common.ClassesForImplementation;
 using Dataspace.Common.Projections.Classes;
 using Dataspace.Common.Projections.Classes.Plan;
 using Dataspace.Common.Projections.Classes.Plan;
+using Dataspace.Common.ServiceResources;
 using Getter=System.Func<System.Collections.Generic.IEnumerable<System.Guid>,
                          System.Collections.Generic.Dictionary<string,object>,
                          System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.Guid, 
@@ -19,7 +20,7 @@ namespace Dataspace.Common.Projections.Services.PlanBuilding
         public ProjectionElement Parent;
         public ProjectionElement Current;
         public Getter Getter;
-        public ResourceQuerier.BaseFuncWithSortedArgs Query;
+        public Query Query;
         //ключ - имя аргумента, значение - имя целевого параметра в запросе. В автоматическом построении всегда будут совпадать
         public ParametersMapping UsingParameters;
         public ParameterNames AllParameters;

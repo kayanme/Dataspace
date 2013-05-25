@@ -9,23 +9,5 @@ using Dataspace.Common.Interfaces;
 
 namespace Resources.Test.Providers
 {
-    [Export(typeof(IResourceQuerierFactory))]
-    internal class Querier:IResourceQuerierFactory
-    {
-
-        private class Q<T> : ResourceQuerier<T>
-        {
-
-            [IsQuery]
-            public IEnumerable<Guid> Universal(UriQuery t)
-            {
-                return null;
-            }
-        }
-
-        public ResourceQuerier<T> CreateQuerier<T>() where T : class
-        {
-            return new Q<T>();
-        }
-    }
+   
 }

@@ -60,6 +60,15 @@ namespace Dataspace.Common.Utility
             }
         }
 
+        public void Clear()
+        {
+            _allElements.Clear();
+            foreach(var index in Indexes)
+            {
+                index.Value.Clear();
+            }
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             return _allElements.GetEnumerator();

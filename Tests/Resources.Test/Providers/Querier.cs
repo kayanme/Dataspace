@@ -15,20 +15,11 @@ namespace Resources.Test.Providers
     [Export(typeof(IResourceQuerierFactory))]
     internal class Querier:IResourceQuerierFactory
     {
+              
 
-        private class Q<T> : ResourceQuerier<T>
+        public FormedQuery CreateQuerier(string type, string nmspc, string[] args)
         {
-
-            [IsQuery]
-            public IEnumerable<Guid> Universal(UriQuery t)
-            {
-                return new[] {Guid.Empty};
-            }
-        }
-
-        public ResourceQuerier<T> CreateQuerier<T>() where T : class
-        {
-            return new Q<T>();
+            return k=> new[] {Guid.Empty};
         }
     }
 }

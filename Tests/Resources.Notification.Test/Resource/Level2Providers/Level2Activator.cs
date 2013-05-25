@@ -32,8 +32,7 @@ namespace Resources.Notification.Test.Resource.Level2Providers
                                typeof (UnnotifiedElementGetter),
                                typeof (NotifiedElementPoster),
                                typeof (UnnotifiedElementPoster),                          
-                               typeof(Factory),
-                               typeof(Querier),
+                               typeof(Factory),                               
                                typeof(Writer),
                                typeof(DownlinkLevel2)
                            };

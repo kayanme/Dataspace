@@ -137,21 +137,12 @@ namespace Dataspace.Common.Projections
             var newRelation = new Relation { ChildElement = child, ParentElement = parent };
             if (child.SchemeType != null)
             {
-                var queries = _queries.FindAppropriateQueries(parent.Namespace,  child.SchemeType);
-                var seriaQueries = _queries.FindAppropriateSeriaQueries(parent.Namespace, parent.Name, child.SchemeType);
-                var queriesPhysical = _queries.FindAppropriateQueries("",  child.SchemeType);
-                var seriaQueriesPhysical = _queries.FindAppropriateSeriaQueries("", parent.Name, child.SchemeType);
-                newRelation.Queries = queries;
-                newRelation.SeriaQueries = seriaQueries;
-                newRelation.QueriesFromPhysicalSpace = queriesPhysical;
-                newRelation.SeriaQueriesFromPhysicalSpace = seriaQueriesPhysical;
+                var queries = _queries.FindAppropriateQueries(parent.Namespace,parent.Name, child.SchemeType);             
+                newRelation.Queries = queries;                
             }
             else
             {
-                newRelation.Queries = null;
-                newRelation.SeriaQueries = null;
-                newRelation.QueriesFromPhysicalSpace = null;
-                newRelation.SeriaQueriesFromPhysicalSpace = null;
+                newRelation.Queries = null;                
             }
             _relations.Add(newRelation);
             return newRelation;
@@ -195,11 +186,7 @@ namespace Dataspace.Common.Projections
                 {
                     relation = CreateRelation(node, childNode);
                     Debug.Assert(relation.HasTrivialQuery ||
-                        relation.Queries !=null 
-                     && relation.QueriesFromPhysicalSpace!= null
-                     && relation.SeriaQueries != null
-                     && relation.SeriaQueriesFromPhysicalSpace != null
-                        );
+                        relation.Queries !=null);
                     node.DownRelations.Add(relation);
                     childNode.UpRelations.Add(relation);
                     ProcessElement(childElement, childNode);

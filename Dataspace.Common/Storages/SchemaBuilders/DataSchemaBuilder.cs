@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
+using Dataspace.Common.ServiceResources;
 
 namespace Dataspace.Common.Projections.Storages.SchemaBuilders
 {
@@ -29,21 +30,21 @@ namespace Dataspace.Common.Projections.Storages.SchemaBuilders
             return new XmlNode[] { doc.CreateTextNode(text) };
         }
 
-        public XmlSchema GetDataSchemas(XmlSchema querySchema,Dictionary<Type,string> registrations)
+        public XmlSchema GetDataSchemas(XmlSchema querySchema,IEnumerable<Registration> registrations)
         {
             var schema = new XmlSchema { TargetNamespace = RegistrationStorage.Dataspace };
             schema.Namespaces.Add("", RegistrationStorage.Dataspace);
             var guid = CreateGuidType();
             schema.Items.Add(guid);
             schema.Includes.Add(new XmlSchemaImport { Schema = querySchema, Namespace = querySchema.TargetNamespace });
-            foreach (var type in registrations.Keys)
+            foreach (var registration in registrations)
             {
                 var etype = new XmlSchemaComplexType
                 {
-                    Name = registrations[type],
+                    Name = registration.ResourceName,
                     Annotation = new XmlSchemaAnnotation()
                 };
-                var doc = new XmlSchemaDocumentation { Markup = TextToNode(type.FullName) };
+                var doc = new XmlSchemaDocumentation { Markup = TextToNode(registration.ResourceType.FullName) };
                 etype.Annotation.Items.Add(doc);
                 etype.Block = XmlSchemaDerivationMethod.Extension;
                 var idAttr = new XmlSchemaAttribute

@@ -28,8 +28,7 @@ namespace Resources.Notification.Test.Resource.Level1Providers
                                typeof (UnnotifiedElementGetter),
                                typeof (NotifiedElementPoster),
                                typeof (UnnotifiedElementPoster),                               
-                               typeof(Factory),
-                               typeof(Querier),
+                               typeof(Factory),                               
                                typeof(Writer),
                                typeof(UplinkLevel1),
                                typeof(TransporterToLevel2)

@@ -4,23 +4,16 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Dynamic;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
-using System.Threading;
 using Dataspace.Common.Announcements;
-using Dataspace.Common.Attributes;
-using Dataspace.Common.Attributes.CachingPolicies;
-using Dataspace.Common.ClassesForImplementation;
 using Dataspace.Common;
 using Dataspace.Common.Data;
 using Dataspace.Common.Interfaces;
 using Dataspace.Common.Interfaces.Internal;
 using Dataspace.Common.Projections.Storages;
 using Dataspace.Common.Services;
-using Dataspace.Common.Statistics;
 using SecurityManager = Dataspace.Common.Security.SecurityManager;
 
 [assembly: InternalsVisibleTo("TestHelper")]
@@ -147,7 +140,7 @@ namespace Common
             CheckInitialization();
             if (!_registrationStorage.IsResourceRegistered(name))
                 throw new ArgumentException("Ресурс не зарегистрирован ");
-            var type =_registrationStorage[name];
+            var type =_registrationStorage[name].ResourceType;
             return new Lazy<object>(GetResourceDeferred(type, id));
         }
 
@@ -164,7 +157,16 @@ namespace Common
         public string GetNameByType(Type type)
         {
             CheckInitialization();
-            return _registrationStorage[type];
+            try
+            {
+                return _registrationStorage[type].ResourceName;
+            }
+            catch (InvalidOperationException)
+            {
+                
+                throw new KeyNotFoundException();
+            }
+            
         }
 
         /// <summary>
@@ -196,7 +198,7 @@ namespace Common
             CheckInitialization();
             if (!_registrationStorage.IsResourceRegistered(name))
                 throw new ArgumentException("Ресурс не зарегистрирован ");
-            var type = _registrationStorage[name];
+            var type = _registrationStorage[name].ResourceType;
             return GetResourceCommon(type, id);
         }
 
@@ -212,9 +214,7 @@ namespace Common
         /// </returns>
         private IEnumerable<Guid> GetResourcesCommon(Type type, string nmspace, UriQuery query)
         {
-
-            Contract.Requires(query != null);
-            Contract.Requires(_storage.TypeRegistered(type));
+            Contract.Requires(query != null);            
             Contract.Ensures(Contract.Result<IEnumerable<Guid>>() != null);
             TypeCheck(type);
             
@@ -248,7 +248,7 @@ namespace Common
         public IEnumerable<Guid> Get(string name, UriQuery query, string nmspace = "") 
         {
             CheckInitialization();
-            var type = _registrationStorage[name];
+            var type = _registrationStorage[name].ResourceType;
             return GetResourcesCommon(type, nmspace,query);
 
         }
@@ -320,7 +320,7 @@ namespace Common
         {
             CheckInitialization();
             Debug.Assert(!string.IsNullOrEmpty(name));
-            var type = _registrationStorage[name];
+            var type = _registrationStorage[name].ResourceType;
             PostResource(type, id, resource);
         }
 
@@ -409,7 +409,7 @@ namespace Common
         public Type GetTypeByName(string name)
         {
             CheckInitialization();
-            var type = _registrationStorage[name];
+            var type = _registrationStorage[name].ResourceType;
             return type;
         }
 
@@ -447,7 +447,7 @@ namespace Common
         public void SetAsUnactual(string name,Guid id)
         {
             CheckInitialization();
-            var type = _registrationStorage[name];
+            var type = _registrationStorage[name].ResourceType;
             SetAsUnactual(type, id);
         }
 
@@ -462,14 +462,14 @@ namespace Common
 
         public void MarkForUpdate(UnactualResourceContent res)
         {
-            var type = _registrationStorage[res.ResourceName];
+            var type = _registrationStorage[res.ResourceName].ResourceType;
             SetAsUnactual(type,res.ResourceKey);
         }
 
         public void MarkForSecurityUpdate(SecurityUpdate res)
         {
             Contract.Requires(res != null);
-            var type = _registrationStorage[res.ResourceName];
+            var type = _registrationStorage[res.ResourceName].ResourceType;
             if (res.UpdateAll)            
                 _securityManager.UpdateSecurity(type);            
             else  

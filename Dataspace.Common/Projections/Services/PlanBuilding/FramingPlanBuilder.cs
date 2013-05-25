@@ -4,16 +4,12 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Dataspace.Common.ClassesForImplementation;
-using Dataspace.Common.ClassesForImplementation;
 using Dataspace.Common.Projections.Classes;
 using Dataspace.Common.Projections.Classes.Descriptions;
 using Dataspace.Common.Projections.Classes.Plan;
 using Dataspace.Common.Projections.Services;
 using Dataspace.Common.Projections.Services.PlanBuilding;
-using Dataspace.Common.Services;
-using Dataspace.Common.Utility;
-using Dataspace.Common.Projections.Classes.Plan;
+using Dataspace.Common.ServiceResources;
 using Dataspace.Common.Services;
 using Dataspace.Common.Utility;
 using Dataspace.Common.Projections.Classes.Utilities;
@@ -55,12 +51,12 @@ namespace Dataspace.Common.Projections
             public Getter FormGetter(Relation relation, BoundingParameter[] parameters, out ParameterNames parameterNames)
             {
                 var testBuilder = new FramingPlanBuilder();
-                ResourceQuerier.BaseFuncWithSortedArgs query;
+                Query query;
                 return testBuilder.FormGetterByRelation(relation, parameters,out parameterNames,out query);
             }
         }
 
-        private Getter FormGetterByRelation(Relation relation, BoundingParameter[] parameters, out ParameterNames parameterNames,out ResourceQuerier.BaseFuncWithSortedArgs query)
+        private Getter FormGetterByRelation(Relation relation, BoundingParameter[] parameters, out ParameterNames parameterNames,out Query query)
         {
             Getter getter;
             if (relation.HasTrivialQuery)
@@ -74,11 +70,7 @@ namespace Dataspace.Common.Projections
             else
             {
                 var targetQuery =
-                    relation.SeriaQueries.OfType<ResourceQuerier.BaseFuncWithSortedArgs>()
-                        .Concat(relation.Queries)
-                        .Concat(relation.SeriaQueriesFromPhysicalSpace)
-                        .Concat(relation.QueriesFromPhysicalSpace)
-                        .SelectTheBestQuery(relation.ParentElement,ref parameters)
+                    relation.SelectTheBestQuery(parameters)
                         .FirstOrDefault();
 
                 if (targetQuery == null)
@@ -88,39 +80,10 @@ namespace Dataspace.Common.Projections
                                       relation.ChildElement.Name));
 
                 query = targetQuery;
-                if (targetQuery is ResourceQuerier.SeriesFuncWithSortedArgs)
-                {
-                    var t = targetQuery as ResourceQuerier.SeriesFuncWithSortedArgs;
-                    getter = (keys, parPairs) =>
-                                 {
-                                     var parValues = t.Args.Select(k => parPairs[k]).ToArray();
-                                     return t.UnconversedFunction(keys, parValues);
-                                 };
-                }
-                else
-                {
-                    var t = targetQuery as ResourceQuerier.FuncWithSortedArgs;
-                    getter = (keys, parPairs) =>
-                                 {
-                                     Func<Guid, object[]> parValues =
-                                         resKey =>
-                                         t.Args.Select(
-                                             k =>
-                                             String.Equals(k, relation.ParentElement.Name, StringComparison.InvariantCultureIgnoreCase)
-                                                 ? resKey
-                                                 : parPairs[k])
-                                             .ToArray();
-                                     return
-                                         keys.Select(
-                                             k =>
-                                             new KeyValuePair<Guid, IEnumerable<Guid>>(k,
-                                                                                       t.UnconversedArgsFunction(
-                                                                                           parValues(k)))).ToArray();
-                                 };
-                   
-                }
-
-                parameterNames = new ParameterNames(targetQuery.Args.Where(k=>!string.Equals(k,relation.ParentElement.Name,StringComparison.InvariantCultureIgnoreCase)));
+                getter = (keys, parPairs) =>
+                           targetQuery.GetMultipleChildResourceQuery(relation.ParentElement.Name,
+                                                             parPairs.Keys.ToArray())(keys,parPairs.Values.ToArray());
+                parameterNames = new ParameterNames(targetQuery.Arguments.Where(k=>!StringComparer.InvariantCultureIgnoreCase.Equals(k,relation.ParentElement.Name)));
             }
             return getter;
         }
@@ -244,7 +207,7 @@ namespace Dataspace.Common.Projections
         private SecondaryFrameNode FormSecondaryOnFirst(PrimaryFrameNode node)
         {
             ParameterNames parameterNames;
-            ResourceQuerier.BaseFuncWithSortedArgs query;
+            Query query;
             var getter = FormGetterByRelation(node.Relation, node.OrderedParameters,out parameterNames,out query);
             var secondary = new SecondaryFrameNode
                                 {
@@ -314,8 +277,8 @@ namespace Dataspace.Common.Projections
                 {
                     if (orderedParameters.Any(k => string.Equals(k, source, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        Debug.Assert(secondaryFrameNode.Query.Conversions.ContainsKey(source), "secondaryFrameNode.Query.Conversions.ContainsKey(source), source:"+source);
-                        plan.AddConversion(source, secondaryFrameNode.Query.Conversions[source]);
+                     //   Debug.Assert(secondaryFrameNode.Query.Conversions.ContainsKey(source), "secondaryFrameNode.Query.Conversions.ContainsKey(source), source:"+source);
+                        plan.AddConversion(source, secondaryFrameNode.Query.GetConversionForParameter(source));
                     }
                 }
                

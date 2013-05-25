@@ -1,4 +1,7 @@
-﻿using Dataspace.Common.ClassesForImplementation;
+﻿using System;
+using System.Collections.Generic;
+using Dataspace.Common.ClassesForImplementation;
+using Dataspace.Common.Data;
 
 namespace Dataspace.Common.Interfaces
 {
@@ -9,10 +12,9 @@ namespace Dataspace.Common.Interfaces
     {
 
         /// <summary>
-        /// Создает запросчик для ресурса.
+        /// Создает запросчик для ресурса, если не найдено подходящего.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        ResourceQuerier<T> CreateQuerier<T>() where T : class;
+        FormedQuery CreateQuerier(string type, string nmspc, string[] args);
     }
 }

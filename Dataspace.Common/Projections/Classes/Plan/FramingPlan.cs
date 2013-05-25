@@ -8,6 +8,7 @@ using System.Text;
 using Dataspace.Common.ClassesForImplementation;
 using Dataspace.Common.Projections.Classes.Descriptions;
 using Dataspace.Common.Projections.Classes.Plan;
+using Dataspace.Common.ServiceResources;
 using Dataspace.Common.Utility;
 using Provider = Dataspace.Common.Utility.Accumulator<
                                   Dataspace.Common.Projections.Classes.FrameNode,
@@ -106,13 +107,13 @@ namespace Dataspace.Common.Projections.Classes
                 _primaryConversions.Add(parameter,conv);
         }
 
-        protected virtual PlanStep CreateStep(ProjectionElement parent, ProjectionElement child, ParameterNames pars, ParameterNames allPars, Provider provider, int priorGroup, ResourceQuerier.BaseFuncWithSortedArgs func)
+        protected virtual PlanStep CreateStep(ProjectionElement parent, ProjectionElement child, ParameterNames pars, ParameterNames allPars, Provider provider, int priorGroup,Query func)
         {
             var step = new PlanStep(parent, child, pars, provider, allPars, priorGroup, _checkMode);
             return step;
         }
 
-        public void AddNewStep(ProjectionElement parent, ProjectionElement child, ParameterNames pars, ParameterNames allPars, Provider provider, int priorGroup, ResourceQuerier.BaseFuncWithSortedArgs func)
+        public void AddNewStep(ProjectionElement parent, ProjectionElement child, ParameterNames pars, ParameterNames allPars, Provider provider, int priorGroup, Query func)
         {
             var step = CreateStep(parent, child, pars, allPars,provider, priorGroup,func);
             _commendations.AddNewStep(step);
@@ -125,7 +126,8 @@ namespace Dataspace.Common.Projections.Classes
 
         public Dictionary<string,object> ConverseArguments(Dictionary<string,string> args)
         {
-            return args.Where(k=>_primaryConversions.ContainsKey(k.Key)).ToDictionary(k => k.Key, k => _primaryConversions[k.Key](k.Value));
+            //конверсии для параметра не будет, если он вообще не используется в проекции, но знать о нем на каждом шаге надо все равно, поэтому оставляем такой без конверсии
+            return args.ToDictionary(k => k.Key, k =>_primaryConversions.ContainsKey(k.Key)? _primaryConversions[k.Key](k.Value):k.Value);
         }
         
     }

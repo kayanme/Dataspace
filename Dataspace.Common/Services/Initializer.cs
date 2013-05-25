@@ -16,6 +16,7 @@ using Dataspace.Common.Interfaces;
 using Dataspace.Common.Projections.Storages;
 using Dataspace.Common.Security;
 using Dataspace.Common.Interfaces.Internal;
+using Dataspace.Common.ServiceResources;
 
 namespace Dataspace.Common.Services
 {
@@ -38,18 +39,10 @@ namespace Dataspace.Common.Services
               
         [Import(AllowRecomposition = false)]
         private SecurityManager _securityManager;
-
-        //это все регистраторы ресурсов. Каждый ресурс, с которым требуется работать, должен быть зарегистрирован.
-        //где располагать регистраторы - дело хозяйское
-        [ImportMany(typeof(ResourceRegistrator))]
-        private IEnumerable<ResourceRegistrator> _registrators;
-     
+        
         [Import(AllowRecomposition = false)]
         private DefaultFabrica _fabrica;
-
-        [Import(AllowRecomposition = false,RequiredCreationPolicy = CreationPolicy.Shared)]
-        private QueryStorage _storage;
-
+       
         [Import(AllowRecomposition = false, RequiredCreationPolicy = CreationPolicy.Shared)]
         private SettingsHolder _settingsHolder;
 
@@ -86,35 +79,12 @@ namespace Dataspace.Common.Services
             return  _fabrica.DefaultCreator<ResourcePoster>("постер", "CreateWriter", type, _posterFactory);
         }
 
-        private static void TestTypeSerialization(Type type)
-        {
-
-            var isSerializable = Attribute.IsDefined(type, typeof(SerializableAttribute));
-
-            Debug.Assert(isSerializable, "Ресурс (" + type.Name + ") должен быть сериализуемым и помеченным атрибутом [Serializable]");
-            if (!isSerializable)
-                throw new InvalidOperationException("Ресурс (" + type.Name + ") должен быть сериализуемым и помеченным атрибутом [Serializable]");
-
-            using (var s = new MemoryStream())
-            {
-                try
-                {
-                    new BinaryFormatter().Serialize(s, Activator.CreateInstance(type));
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException("Тестовая сериализация ресурса " + type.FullName + " неудачна.", ex);
-                }
-
-            }
-        }
+       
 
        
-        internal void PrepareRegistration(Type type)
+        internal void PrepareRegistration(Registration registration)
         {
-
          
-
             Debug.Assert(
               getters.All(
                   k => k.GetType().BaseType != null && k.GetType().BaseType.GetGenericArguments().Length == 1));
@@ -136,65 +106,31 @@ namespace Dataspace.Common.Services
                                 .Select(k => k.First().Value)
                                 .ToDictionary(wrType);
 
-            //определение ресурса
-            var definition = Attribute.GetCustomAttribute(type, typeof(ResourceAttribute)) as ResourceAttribute;
-            //или кэш-данных
-            var cacheData = Attribute.GetCustomAttribute(type, typeof(CachingDataAttribute)) as CachingDataAttribute;
-            //защищен ли ресурс настройками безопасности
-            var securitized = Attribute.GetCustomAttribute(type, typeof(SecuritizedAttribute)) as SecuritizedAttribute;
-            string name;
-
-            if (definition != null)//если это ресурс
-            {
-                Debug.Assert(cacheData == null, "Либо ресурс, либо данные для кэширования!");
-                if (cacheData != null)
-                    throw new InvalidOperationException("Либо ресурс, либо данные для кэширования!");
-
-                TestTypeSerialization(type);
-                name = definition.Name;
-
-            }
-            else if (cacheData != null)//если это кэш-данные
-            {
-                name = cacheData.Name;
-            }
-            else
-            {
-                Debug.Fail("Регистрируемый объект должен быть помечен либо атрибутом [Resource], либо атрибутом [CacheData]. ");
-                throw new InvalidOperationException("Регистрируемый объект должен быть помечен либо атрибутом [Resource], либо атрибутом [CacheData]. ");
-            }
-
-            _registrationStorage.AddRegistrations(type, name);
+            var type = registration.ResourceType;          
             var provider = _providers.ContainsKey(type)
                                ? _providers[type]
                                : GetDefaultGetter(type);
 
             var poster = _posters.ContainsKey(type)
                              ? _posters[type]
-                             : cacheData == null
+                             : !registration.IsCacheData
                                    ? GetDefaultWriter(type)
                                    : null;
 
             Debug.Assert(provider != null);
-            Debug.Assert(poster != null || cacheData != null);
+            Debug.Assert(poster != null || registration.IsCacheData);
 
-            var store = new DataStore(name,provider, poster);
+            var store = new DataStore(registration.ResourceName,provider, poster);
           
             _container.Container.SatisfyImportsOnce(store);
             _container.Container.ComposeExportedValue(store);
           
 
-            store.Initialize(cacheData != null);
+            store.Initialize(registration.IsCacheData);
             
-            if (securitized != null)
+            if (registration.IsSecuritized)
                 _securityManager.RegisterSecuritizedType(type);           
-
-            if ((cacheData == null || cacheData.DefaultQuerier))  //для кэш-данных необязательно нужен запросчик
-                _storage.RegisterType(type);
-
-          
-            Debug.Assert(_storage.TypeRegistered(type) || cacheData != null);
-
+              
             _stores.Add(type,store);
         }
 
@@ -261,26 +197,22 @@ namespace Dataspace.Common.Services
       
 
         public void Initialize()
-        {
-
-
-            _registrationStorage.FlushRegistraions();//их быть не должно
-                     
+        {                    
             try
             {
-                foreach (var type in _registrators.SelectMany(k => k.ResourceTypesInt))
+                foreach (var regisration in _registrationStorage.AllRegistrations)
                 {
                     try
                     {
-                        PrepareRegistration(type);
+                        PrepareRegistration(regisration);
                     }
                     catch (Exception ex)
                     {
-                        throw new InvalidOperationException("Ошибка подготовки типа:" + type.Name, ex);
+                        throw new InvalidOperationException("Ошибка подготовки типа:" + regisration.ResourceName, ex);
                     }
                 }
 
-                foreach (var type in _registrators.SelectMany(k => k.ResourceTypesInt))
+                foreach (var type in _registrationStorage.AllRegistrations.Select(k=>k.ResourceType))
                 {
                     try
                     {

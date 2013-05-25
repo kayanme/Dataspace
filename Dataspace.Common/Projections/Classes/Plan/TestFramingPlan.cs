@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Dataspace.Common.ClassesForImplementation;
 using Dataspace.Common.Projections.Classes.Descriptions;
+using Dataspace.Common.ServiceResources;
 
 namespace Dataspace.Common.Projections.Classes
 {
@@ -43,7 +44,7 @@ namespace Dataspace.Common.Projections.Classes
             }
         }
 
-        protected override PlanStep CreateStep(ProjectionElement parent, ProjectionElement child, Plan.ParameterNames pars, Plan.ParameterNames allPars, Utility.Accumulator<FrameNode, IEnumerable<Guid>> provider, int priorGroup, ResourceQuerier.BaseFuncWithSortedArgs func)
+        protected override PlanStep CreateStep(ProjectionElement parent, ProjectionElement child, Plan.ParameterNames pars, Plan.ParameterNames allPars, Utility.Accumulator<FrameNode, IEnumerable<Guid>> provider, int priorGroup, Query func)
         {
             var step = new TestPlanStep(parent, child, pars, allPars,priorGroup,func);
             return step;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -64,7 +65,6 @@ namespace Dataspace.Common.ParsingServices
 
                 if (type == typeof(Guid?))
                     return checkWrapper(s => _nGuidParser.Parse(s));
-
             Debug.Fail("Нет преобразования типа для параметра типа " + type.Name);
             throw new InvalidOperationException("Нет преобразования типа для параметра типа " + type.Name);
         }
