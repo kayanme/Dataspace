@@ -20,7 +20,6 @@ namespace Dataspace.Common.ClassesForImplementation
 
         [Import]
         protected ITypedPool TypedPool { get; private set; }
-
         
 #pragma warning restore 0649
 

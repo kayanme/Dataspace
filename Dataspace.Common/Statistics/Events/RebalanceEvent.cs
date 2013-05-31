@@ -7,7 +7,7 @@ namespace Dataspace.Common.Statistics.Events
 {
     public sealed class RebalanceEvent:StatisticEvent 
     {
-        public RebalanceEvent(DateTime time,string resourceType,string stage,TimeSpan length = default(TimeSpan)) : base(time)
+        public RebalanceEvent(string name,DateTime time,string resourceType,string stage,TimeSpan length = default(TimeSpan)) : base(name,time)
         {
             Stage = stage;
             ResourceType = resourceType;

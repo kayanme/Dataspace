@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("Resources.Test")]
 namespace Dataspace.Common
 {
-    internal static class Utilities
+    public static class Utilities
     {
 
         /// <summary>

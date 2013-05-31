@@ -28,10 +28,10 @@ namespace Dataspace.Common.Services
 
 #pragma warning disable 0649
         //собственно, они (точнее создаватели по умолчанию)      
-        [Import(AllowDefault = true)]
+        [Import(AllowDefault = true,AllowRecomposition = true)]
         private IResourceGetterFactory _getterFactory;
 
-        [Import(AllowDefault = true)]
+        [Import(AllowDefault = true, AllowRecomposition = true)]
         private IResourcePosterFactory _posterFactory;
 
         [Import(AllowDefault = true)]
@@ -93,7 +93,11 @@ namespace Dataspace.Common.Services
                 k => k.GetType().BaseType.GetGenericArguments().First();
 
             Func<ResourcePoster, Type> wrType =
-               k => k.GetType().BaseType.GetGenericArguments().First();
+               k =>
+                   {
+                       var t = k.GetType().Construct(k2 => k2.BaseType != typeof (ResourcePoster), k2 => k2.BaseType);
+                       return t.Last().BaseType.GetGenericArguments().First();
+                   };
             //все известны кастомные получатели-писатели заполняем сразу. Потом добавим по умолчанию кому надо.
         
             _providers = getters.Where(k =>_settingsHolder.Settings.ActivationSwitchMatch(k.Metadata,_settingsHolder.Provider))

@@ -52,7 +52,7 @@ namespace Dataspace.Common.Services
         private IGenericPool GenericPool { get; set; }
 
         [Import]
-        private TransactedResourceManager _transactedResourceManager;
+        private CompositionService _compositionService;
 
         [Import]
         private QueryStorage _queryStorage;
@@ -62,6 +62,9 @@ namespace Dataspace.Common.Services
 
         [Import]
         private SettingsHolder _settingsHolder;
+
+        [Import]
+        private IAnnouncerSubscriptorInt _subscriptor;
 #pragma warning restore 0649
 
         #endregion
@@ -94,10 +97,7 @@ namespace Dataspace.Common.Services
             get { return _getter.IsTracking; }
             set { _getter.IsTracking = value; }
         }
-
-   
-     
-
+        
         internal  DataStore(string name,
                             ResourceGetter getter, 
                             ResourcePoster poster)
@@ -108,8 +108,6 @@ namespace Dataspace.Common.Services
             if (_poster != null)
               _poster.SetStatChannel(_getter.StatChannel);
         }
-
-
 
         private ICachierStorage<Guid> GetStorageForResource()
         {
@@ -234,16 +232,7 @@ namespace Dataspace.Common.Services
 
             for (int i = 0; i < allUpdates.Count(); i++)
                 _intCachier.MarkForUpdate(allUpdates[i]);
-            var resourceDescription = new UnactualResourceContent { ResourceKey = id, ResourceName = Name };
-         
-            if (Transaction.Current != null)
-            {
-                _transactedResourceManager.AddUnactualResource(resourceDescription, _dataCache);
-            }
-            else
-            {
-                _transactedResourceManager.SendUpdate(resourceDescription);
-            }
+            _subscriptor.AnnonunceUnactuality(Name, id);    
             _storage.ClearLastMarked();
         }
 
@@ -254,10 +243,11 @@ namespace Dataspace.Common.Services
                 return gotObject;
 
             object item;
+            var transactedResourceManager = _compositionService.Container.GetExportedValue<TransactedResourceManager>();
 
-            if (!_settingsHolder.Settings.NativeTransactionMode && Transaction.Current != null)
+            if (Transaction.Current != null)
             {
-                var dataItem = _transactedResourceManager.GetResource(new UnactualResourceContent { ResourceKey = id, ResourceName = Name });
+                var dataItem = transactedResourceManager.GetResource(new UnactualResourceContent { ResourceKey = id, ResourceName = Name });
                 if (dataItem.Content != null)
                     return dataItem.Resource;
             }
@@ -316,31 +306,34 @@ namespace Dataspace.Common.Services
             _dataCache.Clear();
         }
 
-        internal void WriteResource(Guid key, object resource)
+        private void WriteResource(Guid key, object resource)
         {
-            if (_settingsHolder.Settings.NativeTransactionMode || Transaction.Current == null)
+            try
             {
-                try
-                {
-                    _poster.WriteResourceRegardlessofTransaction(key, resource);
-                    _intCachier.MarkForUpdate(new UnactualResourceContent {ResourceName = Name, ResourceKey = key});
-                }
-                catch (Exception ex)
-                {
-                    throw new PostException(Name, ex);
-                }
+                _poster.WriteResourceRegardlessofTransaction(key, resource);
+                _intCachier.MarkForUpdate(new UnactualResourceContent {ResourceName = Name, ResourceKey = key});
             }
-            else
+            catch (Exception ex)
             {
-                _transactedResourceManager.AddResourceToSend(new UnactualResourceContent { ResourceKey = key, ResourceName = Name }, 
-                    resource, _poster);
+                throw new PostException(Name, ex);
             }
+
         }
 
-        internal void DeleteResource(Guid key)
+        internal void PostResource(Guid id,object resource)
         {
-            if (_settingsHolder.Settings.NativeTransactionMode || Transaction.Current == null)
-            {
+            var poster = resource != null ? new Action<Guid, object>(WriteResource)
+                                          : ((key,_) => DeleteResource(key));
+            var transactedResourceManager = _compositionService.Container.GetExportedValue<TransactedResourceManager>();
+
+            transactedResourceManager.AddResourceToSend(
+                   new UnactualResourceContent { ResourceKey = id, ResourceName = Name },
+                   resource,
+                   poster);
+        }
+
+        private void DeleteResource(Guid key)
+        {            
                 try
                 {
                     _poster.DeleteResourceRegardlessofTransaction(key);
@@ -349,15 +342,7 @@ namespace Dataspace.Common.Services
                 catch (Exception ex)
                 {
                     throw new PostException(Name, ex);
-                }
-            }
-            else
-            {
-                _transactedResourceManager.AddResourceToSend(
-                    new UnactualResourceContent {ResourceKey = key, ResourceName = Name}, 
-                    null, 
-                    _poster);
-            }
+                }        
         }
 
     }

@@ -161,7 +161,7 @@ namespace Common
             {
                 return _registrationStorage[type].ResourceName;
             }
-            catch (InvalidOperationException)
+            catch (NullReferenceException)
             {
                 
                 throw new KeyNotFoundException();
@@ -290,11 +290,8 @@ namespace Common
             if (!token.CanWrite)
                 throw new SecurityException("Post denied");
 
-            var store = _stores[type];
-            if (resource == null)
-                store.DeleteResource(id);
-            else
-                store.WriteResource(id, resource);                      
+            var store = _stores[type];       
+            store.PostResource(id, resource);                      
         }
 
         /// <summary>
@@ -439,23 +436,18 @@ namespace Common
             _stores[t].IsTracking = _settingsHolder.Settings.AutoSubscription || false;
         }
 
-        private void SetAsUnactual(Type type, Guid id)
-        {
-            _stores[type].MarkAsUnactual(id);
-        }
-
         public void SetAsUnactual(string name,Guid id)
         {
             CheckInitialization();
             var type = _registrationStorage[name].ResourceType;
-            SetAsUnactual(type, id);
+            _stores[type].MarkAsUnactual(id);
         }
 
         public void SetAsUnactual<T>(Guid id)
         {
             CheckInitialization();
             var type = typeof(T);
-            SetAsUnactual(type, id);
+            _stores[type].MarkAsUnactual(id);
         }
 
      
@@ -463,7 +455,7 @@ namespace Common
         public void MarkForUpdate(UnactualResourceContent res)
         {
             var type = _registrationStorage[res.ResourceName].ResourceType;
-            SetAsUnactual(type,res.ResourceKey);
+            _stores[type].MarkAsUnactual(res.ResourceKey);
         }
 
         public void MarkForSecurityUpdate(SecurityUpdate res)

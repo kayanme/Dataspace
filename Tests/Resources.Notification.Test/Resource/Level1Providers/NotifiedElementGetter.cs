@@ -11,6 +11,7 @@ namespace Resources.Notification.Test.Resource.Level1Providers
 {
 
     [Export(typeof(ResourceGetter))]
+    [Export]
     internal class NotifiedElementGetter:ResourceGetter<NotifiedElement>
     {
 #pragma warning disable 0649
@@ -24,10 +25,6 @@ namespace Resources.Notification.Test.Resource.Level1Providers
             else
                 return null;
         }
-
-        protected override IEnumerable<KeyValuePair<Guid, NotifiedElement>> GetItemsTyped(IEnumerable<Guid> id)
-        {
-            return id.Select(GetItemTyped).ToDictionary(k => k.Key);
-        }
+   
     }
 }

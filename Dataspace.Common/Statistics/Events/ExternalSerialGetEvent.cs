@@ -12,8 +12,8 @@ namespace Dataspace.Common.Statistics.Events
         public TimeSpan Length { get; private set; }
 
 
-        public ExternalSerialGetEvent(IEnumerable<Guid> keys, string type, TimeSpan length, DateTime time)
-            : base(time)
+        public ExternalSerialGetEvent(string name,IEnumerable<Guid> keys, string type, TimeSpan length, DateTime time)
+            : base(name,time)
         {
             Keys = keys;
             ResourceType = type;

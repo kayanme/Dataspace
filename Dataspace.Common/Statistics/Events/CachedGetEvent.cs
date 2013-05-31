@@ -11,7 +11,7 @@ namespace Dataspace.Common.Statistics.Events
         public string ResourceType { get; private set; }
         public TimeSpan Length { get; private set; }
 
-        public CachedGetEvent(Guid key, string type, TimeSpan length,DateTime time):base(time)
+        public CachedGetEvent(string name,Guid key, string type, TimeSpan length,DateTime time):base(name,time)
         {
             Key = key;
             ResourceType = type;

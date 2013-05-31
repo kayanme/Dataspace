@@ -11,9 +11,9 @@ namespace Dataspace.Common.Data
     public sealed class Settings
     {
         /// <summary>
-        /// Использовать транзакции конечного источника данных (true), или формировать и изолировать данные самостоятельно(false).
+        /// Имя экземпляра кэша. Можно задавать уникальные имена для различения кэшей в логах.
         /// </summary>
-        public bool NativeTransactionMode = true;
+        public string InstanceName = "Dataspace cache";
         /// <summary>
         /// Автоматическая подписка уровня на все изменения нижележащего уровня.
         /// </summary>

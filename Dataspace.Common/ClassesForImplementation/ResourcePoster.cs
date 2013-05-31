@@ -21,17 +21,12 @@ namespace Dataspace.Common.ClassesForImplementation
 
         [Import]
         protected IGenericPool GenericPool { get; private set; }
-
-        [Import]
-        private SettingsHolder _settingsHolder;
         
         private IStatChannel _statChannel;
 
-        [Import]
-        private TransactedResourceManager _transactedResourceManager;
 #pragma warning restore 0649    
 
-        internal void SetStatChannel( IStatChannel statChannel)
+        internal void SetStatChannel(IStatChannel statChannel)
         {
             _statChannel = statChannel;
         }
@@ -40,7 +35,8 @@ namespace Dataspace.Common.ClassesForImplementation
         {
             var t = Stopwatch.StartNew();
             WriteResourceInt(key, resource);
-            t.Stop();            
+            t.Stop();         
+            if (_statChannel !=null)
             _statChannel.SendMessageAboutOneResource(key, Actions.Posted, t.Elapsed);
            
         }
@@ -55,12 +51,8 @@ namespace Dataspace.Common.ClassesForImplementation
             DeleteResourceInt(key);
             t.Stop();
             _statChannel.SendMessageAboutOneResource(key, Actions.Posted, t.Elapsed);
-        }
-
-        
-
-        protected abstract void DeleteResourceInt(Guid key);
-                  
+        }        
+        protected abstract void DeleteResourceInt(Guid key);                  
     }
 
     public abstract class ResourcePoster<T>:ResourcePoster where T:class
@@ -70,9 +62,7 @@ namespace Dataspace.Common.ClassesForImplementation
         protected sealed override void WriteResourceInt(Guid key, object resource)
         {            
                 Debug.Assert(resource is T);
-                WriteResourceTyped(key, resource as T);
-          
-          
+                WriteResourceTyped(key, resource as T);                    
         }
 
         protected abstract void WriteResourceTyped(Guid key, T resource);

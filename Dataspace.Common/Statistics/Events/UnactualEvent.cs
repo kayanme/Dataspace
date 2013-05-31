@@ -11,8 +11,8 @@ namespace Dataspace.Common.Statistics.Events
         public string ResourceType { get; private set; }
 
 
-        public UnactualGetEvent(Guid key, string type, DateTime time)
-            : base(time)
+        public UnactualGetEvent(string name,Guid key, string type, DateTime time)
+            : base(name,time)
         {
             Key = key;
             ResourceType = type;           

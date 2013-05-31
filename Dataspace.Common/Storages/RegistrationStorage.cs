@@ -28,14 +28,15 @@ namespace Dataspace.Common.Projections.Storages
         #region Imports
 
 #pragma warning disable 0649
-        [Import(AllowRecomposition = false)] private IAnnouncerSubscriptorInt _subscriptor;
-#pragma warning restore 0649
+        [Import(AllowRecomposition = false)]
+        private IAnnouncerSubscriptorInt _subscriptor;
 
         //это все регистраторы ресурсов. Каждый ресурс, с которым требуется работать, должен быть зарегистрирован.
         //где располагать регистраторы - дело хозяйское
         [ImportMany(typeof(ResourceRegistrator))]
         private IEnumerable<ResourceRegistrator> _registrators;
-     
+#pragma warning restore 0649
+            
         #endregion
 
         public const string Dataspace = "http://metaspace.org/DataSchema";
@@ -48,11 +49,11 @@ namespace Dataspace.Common.Projections.Storages
         private static void TestTypeSerialization(Type type)
         {
 
-            var isSerializable = Attribute.IsDefined(type, typeof(SerializableAttribute));
+            var isSerializable = type.IsSerializable;
 
-            Debug.Assert(isSerializable, "Ресурс (" + type.Name + ") должен быть сериализуемым и помеченным атрибутом [Serializable]");
+            Debug.Assert(isSerializable,string.Format("Ресурс ({0}) должен быть сериализуемым",type.Name));
             if (!isSerializable)
-                throw new InvalidOperationException("Ресурс (" + type.Name + ") должен быть сериализуемым и помеченным атрибутом [Serializable]");
+                throw new InvalidOperationException(string.Format("Ресурс ({0}) должен быть сериализуемым", type.Name));
 
             using (var s = new MemoryStream())
             {
@@ -67,22 +68,22 @@ namespace Dataspace.Common.Projections.Storages
 
             }
         }
-   
+
         /// <summary>
         /// Добавляет записи о регистрации типа-ресурса.
         /// </summary>
-        /// <param name="type">Тип.</param>
-        /// <param name="name">Имя.</param>
-        private void AddRegistrations(Type type, string name,bool isSecuritized,bool isCacheData)
+        /// <param name="registration">Регистрация</param>
+        /// <exception cref="System.InvalidOperationException">Тип регистрируется два раза: + registration.ResourceType</exception>
+        private void AddRegistrations(Registration registration)
         {
             try
             {
-                _registrations.Add(new Registration(name, type, isSecuritized, isCacheData));                
-                _subscriptor.AddResourceName(name);
+                _registrations.Add(registration);
+                _subscriptor.AddResourceName(registration.ResourceName);
             }
             catch (ArgumentException)
             {
-                throw new InvalidOperationException("Тип регистрируется два раза:" + type);
+                throw new InvalidOperationException("Тип регистрируется два раза:" + registration.ResourceType);
             }
         }
 
@@ -115,12 +116,12 @@ namespace Dataspace.Common.Projections.Storages
 
         public Registration this[string name]
         {
-            get { return _registrations.First(k=>k.ResourceName == name); }
+            get { return _registrations.FirstOrDefault(k=>k.ResourceName == name); }
         }
 
         public Registration this[Type type]
         {
-            get { return _registrations.First(k=>k.ResourceType == type); }
+            get { return _registrations.FirstOrDefault(k => k.ResourceType == type); }
         }
 
         public Registration this[Guid id]
@@ -149,46 +150,11 @@ namespace Dataspace.Common.Projections.Storages
         public int Order { get { return 1; } }
         public void Initialize()
         {
-            foreach (var type in _registrators.SelectMany(k => k.ResourceTypesInt))
+            foreach (var registration in _registrators.SelectMany(k => k.GetRegistrations()))
             {
-                try
-                {
-                    string name;
-                    bool isCacheData;
-                    //определение ресурса
-                    var definition = Attribute.GetCustomAttribute(type, typeof(ResourceAttribute)) as ResourceAttribute;
-                    //или кэш-данных
-                    var cacheData = Attribute.GetCustomAttribute(type, typeof(CachingDataAttribute)) as CachingDataAttribute;
-                    //защищен ли ресурс настройками безопасности
-                    var securitized = Attribute.GetCustomAttribute(type, typeof(SecuritizedAttribute)) as SecuritizedAttribute;
-                    bool isSecuritized = securitized != null;
-                    if (definition != null)//если это ресурс
-                    {
-                        Debug.Assert(cacheData == null, "Либо ресурс, либо данные для кэширования!");
-                        if (cacheData != null)
-                            throw new InvalidOperationException("Либо ресурс, либо данные для кэширования!");
-
-                        TestTypeSerialization(type);
-                        name = definition.Name;
-                        isCacheData = false;
-
-                    }
-                    else if (cacheData != null)//если это кэш-данные
-                    {
-                        name = cacheData.Name;
-                        isCacheData = true;
-                    }
-                    else
-                    {
-                        Debug.Fail("Регистрируемый объект должен быть помечен либо атрибутом [Resource], либо атрибутом [CacheData]. ");
-                        throw new InvalidOperationException("Регистрируемый объект должен быть помечен либо атрибутом [Resource], либо атрибутом [CacheData]. ");
-                    }
-                    AddRegistrations(type,name,isSecuritized,isCacheData);
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException("Ошибка подготовки типа:" + type.Name, ex);
-                }
+                if (!registration.IsCacheData)
+                  TestTypeSerialization(registration.ResourceType);
+                AddRegistrations(registration);
             }       
         }
     }

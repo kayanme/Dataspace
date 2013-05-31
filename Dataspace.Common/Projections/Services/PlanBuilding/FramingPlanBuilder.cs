@@ -12,7 +12,6 @@ using Dataspace.Common.Projections.Services.PlanBuilding;
 using Dataspace.Common.ServiceResources;
 using Dataspace.Common.Services;
 using Dataspace.Common.Utility;
-using Dataspace.Common.Projections.Classes.Utilities;
 using Getter=System.Func<System.Collections.Generic.IEnumerable<System.Guid>,
                          System.Collections.Generic.Dictionary<string,object>,
                          System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.Guid, 

@@ -105,9 +105,9 @@ namespace Dataspace.Common.Utility.Dictionary
                                         bool lockTaken = false;
                                         try
                                         {
-                                            var rebalancer = CreateRebalancer();
-                                            _expectedGet = rebalancer.Rebalance();
                                             _writeLock.Enter(ref lockTaken);
+                                            var rebalancer = CreateRebalancer();
+                                            _expectedGet = rebalancer.Rebalance();                                           
                                             _root = rebalancer.ConstructNewTreeAfterCalculation();
                                             _currentPath = rebalancer.OutPath;
                                         }

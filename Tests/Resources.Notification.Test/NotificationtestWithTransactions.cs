@@ -9,11 +9,7 @@ namespace Resources.Notification.Test
 {
    
     partial class NotificationTest
-    {
-        [TestMethod]      
-        [TestCategory("Notification")]
-        [TestCategory("Caching")]
-        [TestCategory("Transaction")]
+    {       
         public void WithTransaction()
         {
 

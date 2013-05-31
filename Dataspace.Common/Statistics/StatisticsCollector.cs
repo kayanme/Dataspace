@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
+using Dataspace.Common.Services;
 using Dataspace.Common.Statistics;
 using Dataspace.Common.Statistics.Events;
 
@@ -14,6 +15,9 @@ namespace Dataspace.Common.Statistics
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal class StatisticsCollector
     {
+
+        [Import] 
+        private SettingsHolder _settings;
 
         private Dictionary<string,List<ConcurrentQueue<StatChannel.Mesg>>> _channels 
             = new Dictionary<string, List<ConcurrentQueue<StatChannel.Mesg>>>();
@@ -118,6 +122,7 @@ namespace Dataspace.Common.Statistics
         private void ProcessMessages()
         {
             var updates = new List<StatisticEvent>();
+            var name = _settings.Settings.InstanceName;
             const int maxUpdates =100;
             foreach (var typeChannels in _channels)
                 foreach(var channel in typeChannels.Value)
@@ -128,28 +133,28 @@ namespace Dataspace.Common.Statistics
                         switch (msg.Action)
                         {
                             case Actions.Posted:
-                                 updates.Add(new PostEvent(msg.id, typeChannels.Key, msg.Length, msg.Time));
+                                updates.Add(new PostEvent(name,msg.id, typeChannels.Key, msg.Length, msg.Time));
                                 break;
                             case Actions.ExternalGet:
                                 if (msg.ids == null)
-                                  updates.Add(new ExternalGetEvent(msg.id, typeChannels.Key, msg.Length, msg.Time));
+                                    updates.Add(new ExternalGetEvent(name, msg.id, typeChannels.Key, msg.Length, msg.Time));
                                 else
-                                  updates.Add(new ExternalSerialGetEvent(msg.ids, typeChannels.Key, msg.Length, msg.Time));                                
+                                    updates.Add(new ExternalSerialGetEvent(name, msg.ids, typeChannels.Key, msg.Length, msg.Time));                                
                                 break;
                             case Actions.CacheGet:
-                               updates.Add(new CachedGetEvent(msg.id, typeChannels.Key, msg.Length, msg.Time));
+                                updates.Add(new CachedGetEvent(name, msg.id, typeChannels.Key, msg.Length, msg.Time));
                                 break;
                             case Actions.BecameUnactual:
-                               updates.Add(new UnactualGetEvent(msg.id, typeChannels.Key, msg.Time));
+                                updates.Add(new UnactualGetEvent(name, msg.id, typeChannels.Key, msg.Time));
                                 break;
                             case Actions.RebalanceStarted:
-                                updates.Add(new RebalanceEvent(msg.Time, typeChannels.Key,"Started"));
+                                updates.Add(new RebalanceEvent(name, msg.Time, typeChannels.Key, "Started"));
                                 break;
                             case Actions.RebalanceQueued:
-                                updates.Add(new RebalanceEvent(msg.Time, typeChannels.Key, "Queued"));
+                                updates.Add(new RebalanceEvent(name, msg.Time, typeChannels.Key, "Queued"));
                                 break;
                             case Actions.RebalanceEnded:
-                                updates.Add(new RebalanceEvent(msg.Time, typeChannels.Key, "Ended",msg.Length));
+                                updates.Add(new RebalanceEvent(name, msg.Time, typeChannels.Key, "Ended", msg.Length));
                                 break;
                         }
                     }

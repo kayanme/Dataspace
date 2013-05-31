@@ -15,6 +15,7 @@ namespace Dataspace.Common.Services
         [Import(AllowDefault = true)]
         private CompositionContainer _container;
         public CompositionContainer Container{get { return _container; }}
+        
 
         internal void SetContainer(CompositionContainer container)
         {

@@ -16,10 +16,6 @@ namespace Dataspace.Common.Interfaces
         /// <typeparam name="T">Тип ресурса</typeparam>
         /// <returns></returns>
         ResourcePoster<T> CreateWriter<T>() where T : class;
-        /// <summary>
-        /// Создает постер серии ресурсов.
-        /// </summary>
-        /// <returns></returns>
-        Action<IEnumerable<Tuple<UnactualResourceContent, object>>>  ReturnSerialWriter();
+       
     }
 }

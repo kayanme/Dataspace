@@ -11,7 +11,7 @@ namespace Resources.Notification.Test.Resource.Level1Providers
 {
 
     [Export(typeof(ResourcePoster))]
-    internal class NotifiedElementPoster:ResourcePoster<NotifiedElement>
+    public class NotifiedElementPoster:ResourcePoster<NotifiedElement>
     {
 #pragma warning disable 0649
         [Import] 

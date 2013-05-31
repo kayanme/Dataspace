@@ -117,6 +117,7 @@
     <Compile Include="ClassesForImplementation\Security\SecurityProvider.cs" />
     <Compile Include="ClassesForImplementation\Security\ISecurityContext.cs" />
     <Compile Include="ClassesForImplementation\PropertiesProvider.cs" />
+    <Compile Include="Data\DataRecord.cs" />
     <Compile Include="Data\QueryDelegates.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\Settings.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Interfaces\IDefaultSecurityProvider.cs" />
     <Compile Include="Interfaces\Internal\IAnnouncerSubscriptorInt.cs" />
     <Compile Include="Interfaces\Internal\IInitialize.cs" />
+    <Compile Include="Interfaces\IPacketResourcePoster.cs" />
     <Compile Include="Interfaces\ISchemeControlling.cs" />
     <Compile Include="Interfaces\ISecurityUpdater.cs" />
     <Compile Include="ParsingServices\Classic Parsers\ArrayParser.cs" />
@@ -156,7 +158,6 @@
     <Compile Include="Projections\Classes\Plan\TestPlanStep.cs" />
     <Compile Include="Projections\Classes\ProjectionFrame.cs" />
     <Compile Include="Projections\Classes\Plan\TestFramingPlan.cs" />
-    <Compile Include="Projections\Classes\Utilities\NetSolving.cs" />
     <Compile Include="Projections\Services\PlanBuilding\AccumulatorFactory.cs" />
     <Compile Include="Projections\Services\PlanBuilding\BoundingParameter.cs" />
     <Compile Include="Projections\Services\PlanBuilding\FramingPlanBuilder.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Projections\Services\Writers\XmlStreamer.cs" />
     <Compile Include="Projections\Services\Writers\XmlWriter.cs" />
     <Compile Include="ServiceResources\QueryInfo.cs" />
+    <Compile Include="Services\SerialPoster.cs" />
     <Compile Include="Storages\ProjectionStorage.cs" />
     <Compile Include="Storages\RegistrationStorage.cs" />
     <Compile Include="Storages\SchemaBuilders\DataSchemaBuilder.cs" />
@@ -215,7 +217,8 @@
     <Compile Include="Statistics\StatisticsCollector.cs" />
     <Compile Include="Statistics\Subscribers\DebugLogger.cs" />
     <Compile Include="Transactions\TransactedResourceManager.cs" />
-    <Compile Include="Transactions\TransactedUpdatesStorage.cs" />
+    <Compile Include="Transactions\TransactionPacketStorage.cs" />
+    <Compile Include="Transactions\TransactionStoragesStorage.cs" />
     <Compile Include="Utility\Accumulator.cs" />
     <Compile Include="Utility\CachierExtensions.cs" />
     <Compile Include="ClassesForImplementation\ResourceRegistrator.cs" />
@@ -243,8 +246,6 @@
     <Compile Include="Utility\Dictionary\UpgradedCache.cs" />
     <Compile Include="Utility\IndexedCollection\ExpressionTreeComparer.cs" />
     <Compile Include="Utility\IndexedCollection\IndexedCollection.cs" />
-    <Compile Include="Utility\XDocComparer.cs" />
-    <Compile Include="Utility\XmlBuilder.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

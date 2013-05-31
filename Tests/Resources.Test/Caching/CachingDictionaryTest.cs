@@ -318,8 +318,8 @@ namespace Resources.Test
         {
             var testtime = TimeSpan.FromMinutes(5);           
             var dictionary = new GuidCache(queueRebalance: a => Task.Factory.StartNew(a));
-            TestIntensity(dictionary, testtime, 10);         
-            TestIntensity(dictionary, testtime, 1);
+         //   TestIntensity(dictionary, testtime, 10);         
+         //   TestIntensity(dictionary, testtime, 1);
         }
     }
 }
