@@ -48,6 +48,8 @@ namespace Projections.Test.UnitTests
         }
 
 
+
+
         [TestMethod]
         [TestCategory("Projections")]
         public void ChoiceBetweenPhysicalAndNot()

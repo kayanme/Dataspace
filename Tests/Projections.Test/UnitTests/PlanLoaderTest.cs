@@ -63,7 +63,7 @@ namespace Hierarchies.Test
             Assert.AreEqual(element,relation.ParentElement);
             Assert.AreEqual("Attribute", attribute.Name);
             Assert.AreEqual("http://tempuri.org/BaseScheme", attribute.Namespace);
-            Assert.AreEqual(1, relation.Queries.Count());            
+            Assert.AreEqual(3, relation.Queries.Count());            
         }
 
         [TestMethod]
@@ -87,7 +87,7 @@ namespace Hierarchies.Test
             value = relation.ChildElement;
             Assert.AreEqual("Value", value.Name);
             Assert.AreEqual(1, value.DownRelations.Count);
-            Assert.AreEqual(1, relation.Queries.Count());
+            Assert.AreEqual(5, relation.Queries.Count());
             
             value = storage.FindElement("Value", "http://tempuri.org/Namefilter");
             Assert.AreEqual(1,value.DownRelations.Count);
