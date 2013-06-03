@@ -21,7 +21,7 @@ namespace Dataspace.Over.EntityFramework.Examples
         }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
+        {            
             throw new UnintentionalCodeFirstException();
         }
     

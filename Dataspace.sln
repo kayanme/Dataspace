@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataspace.Over.EntityFramew
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataspace.Over.BLToolkit", "Dataspace.Over.BLToolkit\Dataspace.Over.BLToolkit.csproj", "{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataspace.Loggers", "Dataspace.Loggers\Dataspace.Loggers.csproj", "{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfTest", "PerfTest\PerfTest.csproj", "{23E647B3-0436-4529-82AA-67180AC0D91C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug - MLS Compile|Any CPU = Debug - MLS Compile|Any CPU
@@ -125,6 +129,24 @@ Global
 		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C3EDFEB9-4F79-43D1-885E-5C6D11BF4CA7}.Release|x86.ActiveCfg = Release|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Debug - MLS Compile|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Debug - MLS Compile|Any CPU.Build.0 = Debug|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Debug - MLS Compile|x86.ActiveCfg = Debug|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6752F3B-5C21-47EB-AD1D-C7AC14AD3AF2}.Release|x86.ActiveCfg = Release|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Debug - MLS Compile|Any CPU.ActiveCfg = Debug|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Debug - MLS Compile|Any CPU.Build.0 = Debug|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Debug - MLS Compile|x86.ActiveCfg = Debug|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23E647B3-0436-4529-82AA-67180AC0D91C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

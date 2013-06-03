@@ -78,6 +78,68 @@ namespace Projections.Test.UnitTests
 
         [TestMethod]
         [TestCategory("Projections")]
+        public void QuerySelectionForParentWithNoQuery()
+        {
+            var parent = new ProjectionElement { Name = "parent" };
+            var child = new ProjectionElement { Name = "child" };
+            var query1 = Query.CreateTestStubQuery("", null, "notParent");           
+            var relation = new Relation
+            {
+                ParentElement = parent,
+                ChildElement = child,
+                Queries = new[]
+                                                 {
+                                                     query1
+                                                 }
+            };
+            var bestQuery = relation.SelectTheBestQuery(new BoundingParameter[0]).First();
+            Assert.AreSame(query1, bestQuery);
+        }
+
+        [TestMethod]
+        [TestCategory("Projections")]
+        public void QuerySelectionForParentWithNoQueryAndBounding()
+        {
+            var parent = new ProjectionElement { Name = "parent" };
+            var child = new ProjectionElement { Name = "child" };
+            var query2 = Query.CreateTestStubQuery("", null, "notParent","name");
+            var query1 = Query.CreateTestStubQuery("", null, "notParent");
+            var relation = new Relation
+            {
+                ParentElement = parent,
+                ChildElement = child,
+                Queries = new[]
+                                                 {
+                                                     query1,query2
+                                                 }
+            };
+            var bestQuery = relation.SelectTheBestQuery(new[] { new BoundingParameter("name", 1) }).First();
+            Assert.AreSame(query2, bestQuery);
+        }
+
+        [TestMethod]
+        [TestCategory("Projections")]
+        public void QuerySelectionBetweenParentlessAndParented()
+        {
+            var parent = new ProjectionElement { Name = "parent" };
+            var child = new ProjectionElement { Name = "child" };
+            var query2 = Query.CreateTestStubQuery("", null, "notParent", "name");
+            var query1 = Query.CreateTestStubQuery("", null, "parent");
+            var relation = new Relation
+            {
+                ParentElement = parent,
+                ChildElement = child,
+                Queries = new[]
+                                                 {
+                                                     query1,query2
+                                                 }
+            };
+            var bestQuery = relation.SelectTheBestQuery(new[] { new BoundingParameter("name", 1) }).First();
+            Assert.AreSame(query2, bestQuery);
+        }
+
+        [TestMethod]
+        [TestCategory("Projections")]
         public void QuerySelectionWithParamsAtDifferentDepths()
         {
             var parent = new ProjectionElement { Name = "parent" };

@@ -135,8 +135,7 @@ namespace Dataspace.Common.Services
                 return null;
             var resKey = _registrationStorage[childResource].ResourceKey;
             return _baseQueries.Where(k =>k.ResourceKey == resKey)
-                               .Where(k=>(string.IsNullOrEmpty(k.QueryInfo.Namespace) || _parameterComparer.Equals(k.QueryInfo.Namespace, nmspc)))
-                               .Where(k=>k.Arguments.Contains(parentResource));
+                               .Where(k=>(string.IsNullOrEmpty(k.QueryInfo.Namespace) || _parameterComparer.Equals(k.QueryInfo.Namespace, nmspc)));
        
 
         }

@@ -69,6 +69,8 @@ namespace Dataspace.Common.ClassesForImplementation
 
         internal override sealed IEnumerable<Query> ReturnQueries()
         {            
+            if (_registrationStorage[typeof (T)] == null)
+                return new Query[0];
             var methods = SelectApplicableMethods();
             var spaces = from meth in methods
                          let spc = meth.GetCustomAttributes(typeof (QueryNamespaceAttribute), false)

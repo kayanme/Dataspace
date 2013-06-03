@@ -23,30 +23,41 @@ namespace Dataspace.Common.Projections.Classes
 
             Func<string, string, bool> equals =
                 (a, b) => string.Equals(a, b, StringComparison.InvariantCultureIgnoreCase);
-           
-            if (query.Arguments.Where(k => !equals(k, parentName))
+
+            //отсев запросов, у которых есть параметры, не являющиеся родительским параметром или одним параметром из списка
+            if (query.Arguments
+                     .Where(k => !equals(k, parentName))
                      .Any(k => parameters.All(k2 => !equals(k2.Name, k))))
                 return -1;
-           
-            double rank;
-            if (query.ArgCount == 1)
+
+            double rank = 0.1;
+
+
+            if (query.Arguments.Contains(parentName) && query.ArgCount == 1)
+            {
                 rank = 0.5;
-            else
+            }
+            else if (parameters.Length != 0)
             {
                 var correctiveFloor = parameters.Max(k => k.Depth);
                 //нужно перевести глубину параметров от текущей точки в рейтинг для текущей точки, т.е. перевернуть их все
-
                 rank =
-                    query.Arguments.Where(k => !equals(k, parentName)).Select(
-                        k => correctiveFloor - parameters.Single(k2 => equals(k2.Name, k)).Depth + 1).Sum();    
+                   query.Arguments.Where(k => !equals(k, parentName)).Select(
+                       k => correctiveFloor - parameters.Single(k2 => equals(k2.Name, k)).Depth + 1).Sum();
             }
-            rank *= 2;
+
+            if (query.Arguments.Contains(parentName))
+            {
+
+
+                rank *= 2;
+
+                if (query.SerialQueryIsPreferred(parentName))
+                    rank += 1;
+            }
 
             if (!string.IsNullOrEmpty(query.Namespace))
                 rank *= 100;
-
-            if (query.SerialQueryIsPreferred(parentName))
-                rank += 1;
             return rank;
         }
 

@@ -70,22 +70,22 @@ namespace Dataspace.Common.ServiceResources
             var reordering = CreateReorderSeq(parametersInOrder);
             if (_returnType == typeof(MultKeys))
             {
-                return args => (_queryMethod(Reorder(args, reordering)) as MultKeys).SelectMany(k=>k.Value);
+                return args => (_queryMethod(Reorder(args, reordering)) as MultKeys).SelectMany(k => k.Value);
             }
             else if (_returnType == typeof(IEnumerable<Guid>))
             {
                 return args =>
-                           {
-                               var res = _queryMethod(Reorder(args, reordering)) as IEnumerable<Guid>;
-                               Debug.Assert(res != null);
-                               return res;
-                           };
+                {
+                    var res = _queryMethod(Reorder(args, reordering)) as IEnumerable<Guid>;
+                    Debug.Assert(res != null);
+                    return res;
+                };
             }
             else
             {
                 throw new ArgumentException();
             }
-           
+
         }
 
         public bool CanBeAQueryForParentResource(string parentResourceName)
@@ -93,56 +93,79 @@ namespace Dataspace.Common.ServiceResources
             return QueryInfo.Arguments.Contains(parentResourceName, StringComparer.InvariantCultureIgnoreCase);
         }
 
-        public QueryForSingleParentResource GetSingleChildResourceQuery(string parentName,params string[] parameters)
+        public QueryForSingleParentResource GetSingleChildResourceQuery(string parentName, params string[] parameters)
         {
-            var ar = new string[parameters.Length + 1];
-            ar[0] = parentName;
-            Array.Copy(parameters, 0, ar, 1, parameters.Length);
-            
+            var ar = FormInParameterNames(parentName, parameters);
+
             Func<Guid, object[], object[]> argConv;
-            if (!SerialQueryIsPreferred(parentName))
+            if (!Arguments.Contains(parentName))
             {
-                argConv = (key, args) => new object[] {key}.Concat(args).ToArray();
+                argConv = (key, args) => args.ToArray();
+            }
+            else if (!SerialQueryIsPreferred(parentName))
+            {
+                argConv = (key, args) => new object[] { key }.Concat(args).ToArray();
             }
             else
             {
-                argConv = (key, args) => new object[] {new[] {key}}.Concat(args).ToArray();
+                argConv = (key, args) => new object[] { new[] { key } }.Concat(args).ToArray();
             }
-            
+
             var method = GetQueryMethod(ar);
             return (id, args) => method(argConv(id, args));
         }
 
-        public QueryForMultipleParentResource GetMultipleChildResourceQuery(string parentName,params string[] parameters)
+        private string[] FormInParameterNames(string parentName, string[] parameters)
         {
-            var ar = new string[parameters.Length + 1];
-            ar[0] = parentName;
-            Array.Copy(parameters, 0, ar, 1, parameters.Length);            
-            QueryForMultipleParentResource methConv;                     
+            String[] ar;
+            if (!Arguments.Contains(parentName))
+            {
+                ar = parameters;
+            }
+            else
+            {
+                ar = new string[parameters.Length + 1];
+                ar[0] = parentName;
+                Array.Copy(parameters, 0, ar, 1, parameters.Length);
+            }
+            return ar;
+        }
+
+        public QueryForMultipleParentResource GetMultipleChildResourceQuery(string parentName, params string[] parameters)
+        {
+            var ar = FormInParameterNames(parentName, parameters);
+
+            QueryForMultipleParentResource methConv;
             if (_returnType == typeof(IEnumerable<Guid>))
             {
                 var method = GetQueryMethod(ar);
-                if (!SerialQueryIsPreferred(parentName))
+                if (!Arguments.Contains(parentName))
                 {
                     methConv = (keys, args) =>
-                               keys.Select(key => new KeyValuePair<Guid, IEnumerable<Guid>>(key,method(new object[] {key}.Concat(args).ToArray())));                                                                          
+                             keys.Select(key => new KeyValuePair<Guid, IEnumerable<Guid>>(key, method(args).ToArray()));
+                }
+                else if (!SerialQueryIsPreferred(parentName))
+                {
+                    methConv = (keys, args) =>
+                               keys.Select(key => new KeyValuePair<Guid, IEnumerable<Guid>>(key, method(new object[] { key }.Concat(args).ToArray())));
                 }
                 else
                 {
-                   throw new ArgumentException();
+                    throw new ArgumentException();
                 }
             }
             else if (_returnType == typeof(MultKeys))
             {
                 var reordering = CreateReorderSeq(ar);
-                if (!SerialQueryIsPreferred(parentName))
+
+                if (!Arguments.Contains(parentName) || !SerialQueryIsPreferred(parentName))
                 {
                     throw new ArgumentException();
                 }
                 else
                 {
                     methConv = (keys, args) =>
-                                  _queryMethod(Reorder(new object[] { keys }.Concat(args).ToArray(),reordering)) as MultKeys;
+                                  _queryMethod(Reorder(new object[] { keys }.Concat(args).ToArray(), reordering)) as MultKeys;
                 }
             }
             else
