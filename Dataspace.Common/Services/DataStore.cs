@@ -38,37 +38,33 @@ namespace Dataspace.Common.Services
             }
         }
 
-        #region Imports
+        [Export]
+        internal class DataStoreServicesPackage
+        {
+            [Import]
+            public StatisticsCollector _statisticsCollector;
 
-#pragma warning disable 0649
+            [Import]
+            public IGenericPool GenericPool;
 
-        [Import]
-        private StatisticsCollector _statisticsCollector;
+            [Import]
+            public QueryStorage _queryStorage;
 
-        [Import]
-        private ITypedPool TypedPool { get; set; }
+            [Import]
+            public IInterchangeCachier _intCachier;
 
-        [Import]
-        private IGenericPool GenericPool { get; set; }
+            [Import]
+            public SettingsHolder _settingsHolder;
 
-        [Import]
-        private CompositionService _compositionService;
+            [Import]
+            public IAnnouncerSubscriptorInt _subscriptor;
 
-        [Import]
-        private QueryStorage _queryStorage;
+            [Import]
+            public TransactedResourceManager _resourceManager;
+        }
 
-        [Import]
-        private IInterchangeCachier _intCachier;
-
-        [Import]
-        private SettingsHolder _settingsHolder;
-
-        [Import]
-        private IAnnouncerSubscriptorInt _subscriptor;
-#pragma warning restore 0649
-
-        #endregion
-
+        private DataStoreServicesPackage _services;
+  
         private readonly ResourceGetter _getter;
         private readonly ResourcePoster _poster;
         private readonly ConcurrentDictionary<Guid, ConcurrentBag<UnactualResourceContent>> _dependentUpdates = new ConcurrentDictionary<Guid, ConcurrentBag<UnactualResourceContent>>();
@@ -100,8 +96,11 @@ namespace Dataspace.Common.Services
         
         internal  DataStore(string name,
                             ResourceGetter getter, 
-                            ResourcePoster poster)
+                            ResourcePoster poster,
+                            DataStoreServicesPackage services)
         {
+            Debug.Assert(services != null);
+            _services = services;
             _name = name;
             _getter = getter;
             _poster = poster;
@@ -109,15 +108,15 @@ namespace Dataspace.Common.Services
               _poster.SetStatChannel(_getter.StatChannel);
         }
 
-        private ICachierStorage<Guid> GetStorageForResource()
+        private ICachierStorage<Guid> GetStorageForResource(StatisticsCollector statisticsCollector)
         {
-            var storage = new CurrentCachierStorageNoRef(_getter.StatChannel, _statisticsCollector);
+            var storage = new CurrentCachierStorageNoRef(_getter.StatChannel, statisticsCollector);
             return storage;
         }
-
-        private ICachierStorage<Guid> GetStorageForCacheData()
+     
+        private ICachierStorage<Guid> GetStorageForCacheData(StatisticsCollector statisticsCollector)
         {
-            var storage = new CurrentCachierStorageRef(_getter.StatChannel, _statisticsCollector);
+            var storage = new CurrentCachierStorageRef(_getter.StatChannel, statisticsCollector);
             return storage;
         }
 
@@ -140,8 +139,8 @@ namespace Dataspace.Common.Services
         /// <param name="parentGetter">The parent getter.</param>
         internal void ProcessChildQueriedCaching(DataStore parentGetter)
         {
-            var parType = GenericPool.GetTypeByName(parentGetter.Name);
-            var parentsQuery = _queryStorage.FindQuery(parType, "", new[] { Name });
+            var parType = _services.GenericPool.GetTypeByName(parentGetter.Name);
+            var parentsQuery = _services._queryStorage.FindQuery(parType, "", new[] { Name });
 
             _updateDependenciesByQueries.Add(id =>
             {
@@ -161,7 +160,7 @@ namespace Dataspace.Common.Services
         internal void ProcessDependentCaching(Type cachingPoliticsSender)
         {
 
-            var resName = GenericPool.GetNameByType(cachingPoliticsSender);
+            var resName = _services.GenericPool.GetNameByType(cachingPoliticsSender);
             _dependentTypes.Add(resName);
         }
 
@@ -171,9 +170,9 @@ namespace Dataspace.Common.Services
         /// <param name="cachingPoliticsSender">Дочерний тип.</param>
         internal void ProcessParentQueriedCaching(Type cachingPoliticsSender)
         {
-            var resName = GenericPool.GetNameByType(cachingPoliticsSender);
+            var resName = _services.GenericPool.GetNameByType(cachingPoliticsSender);
 
-            var query = _queryStorage.FindQuery(cachingPoliticsSender, "", new UriQuery { { Name, "" } });
+            var query = _services._queryStorage.FindQuery(cachingPoliticsSender, "", new UriQuery { { Name, "" } });
 
             _updatesByQueries.Add(id => query(new UriQuery { { Name, id.ToString() } })
                              .Select(k => new UnactualResourceContent { ResourceName = resName, ResourceKey = k }));
@@ -183,10 +182,11 @@ namespace Dataspace.Common.Services
         internal void Initialize(bool isCacheData)
         {
             Debug.Assert(_getter.StatChannel != null);
-            Debug.Assert(_statisticsCollector != null);
-            _dataCache = isCacheData ? GetStorageForCacheData() : GetStorageForResource();
+            Debug.Assert(_services._statisticsCollector != null);
+            _dataCache = isCacheData ? GetStorageForCacheData(_services._statisticsCollector)
+                : GetStorageForResource(_services._statisticsCollector);
             _accumulator = _getter.ReturnAccumulator(_dataCache,GetResource);
-            IsTracking = _settingsHolder.Settings.AutoSubscription;
+            IsTracking = _services._settingsHolder.Settings.AutoSubscription;
             _getter.StatChannel.Register(Name);
         }
 
@@ -231,8 +231,8 @@ namespace Dataspace.Common.Services
                 Debugger.Break();
 
             for (int i = 0; i < allUpdates.Count(); i++)
-                _intCachier.MarkForUpdate(allUpdates[i]);
-            _subscriptor.AnnonunceUnactuality(Name, id);    
+                _services._intCachier.MarkForUpdate(allUpdates[i]);
+            _services._subscriptor.AnnonunceUnactuality(Name, id);    
             _storage.ClearLastMarked();
         }
 
@@ -243,12 +243,11 @@ namespace Dataspace.Common.Services
                 return gotObject;
 
             object item;
-            var transactedResourceManager = _compositionService.Container.GetExportedValue<TransactedResourceManager>();
-
+         
             if (Transaction.Current != null)
             {
-                var dataItem = transactedResourceManager.GetResource(new UnactualResourceContent { ResourceKey = id, ResourceName = Name });
-                if (dataItem.Content != null)
+                var dataItem = _services._resourceManager.GetResource(new UnactualResourceContent { ResourceKey = id, ResourceName = Name });
+                if (dataItem != null)
                     return dataItem.Resource;
             }
 
@@ -269,8 +268,7 @@ namespace Dataspace.Common.Services
 
                 if (cameFromoutside)
                 {
-                    _updateDependenciesByQueries.ForEach(k => k(id));
-                    _getter.StatChannel.SendMessageAboutOneResource(id, Actions.ExternalGet, t.Elapsed);
+                    _updateDependenciesByQueries.ForEach(k => k(id));//сообщение о том, что ресурс пришел снаружи, приходит из геттера                    
                 }
                 else
                 {
@@ -310,8 +308,10 @@ namespace Dataspace.Common.Services
         {
             try
             {
+                if (_poster == null)
+                    throw new InvalidOperationException("There is no poster for resource "+_name);
                 _poster.WriteResourceRegardlessofTransaction(key, resource);
-                _intCachier.MarkForUpdate(new UnactualResourceContent {ResourceName = Name, ResourceKey = key});
+                _services._intCachier.MarkForUpdate(new UnactualResourceContent { ResourceName = Name, ResourceKey = key });
             }
             catch (Exception ex)
             {
@@ -324,9 +324,8 @@ namespace Dataspace.Common.Services
         {
             var poster = resource != null ? new Action<Guid, object>(WriteResource)
                                           : ((key,_) => DeleteResource(key));
-            var transactedResourceManager = _compositionService.Container.GetExportedValue<TransactedResourceManager>();
 
-            transactedResourceManager.AddResourceToSend(
+            _services._resourceManager.AddResourceToSend(
                    new UnactualResourceContent { ResourceKey = id, ResourceName = Name },
                    resource,
                    poster);
@@ -337,7 +336,7 @@ namespace Dataspace.Common.Services
                 try
                 {
                     _poster.DeleteResourceRegardlessofTransaction(key);
-                    _intCachier.MarkForUpdate(new UnactualResourceContent {ResourceName = Name, ResourceKey = key});
+                    _services._intCachier.MarkForUpdate(new UnactualResourceContent { ResourceName = Name, ResourceKey = key });
                 }
                 catch (Exception ex)
                 {

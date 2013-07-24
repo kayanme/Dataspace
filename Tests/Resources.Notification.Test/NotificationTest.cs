@@ -175,5 +175,13 @@ namespace Resources.Notification.Test
             Settings.NoCacheGarbageChecking = true;
             
         }
+
+
+        [TestCleanup]
+        public void Shutdown()
+        {
+            _level1Interaction.Shutdown();
+            _level2Interaction.Shutdown();
+        }
     }
 }

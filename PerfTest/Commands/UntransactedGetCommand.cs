@@ -13,20 +13,22 @@ namespace PerfTest.Commands
     {
         public override void Do(IGenericPool service)
         {
-            _res = service.Get(_name, _id) as ResBase;
+            Res = service.Get(_name, _id) as ResBase;
         }
 
         public override bool Check(Store store)
         {
             var res = store.GetResource(GetResourceType(_name), _id) as ResBase;
-            return res.Payload == _res.Payload;
+            if (res == null || Res == null)
+                return res == null && Res == null;
+            return  res.Payload == Res.Payload;
         }
 
         private Guid _id;
 
         private string _name;
 
-        private ResBase _res;
+        public ResBase Res { get; private set; }
 
         public UntransactedGetCommand(Guid id,string name)
         {

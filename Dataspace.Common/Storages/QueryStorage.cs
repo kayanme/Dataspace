@@ -27,7 +27,7 @@ namespace Dataspace.Common.Services
         private IndexedCollection<Query> _cachedQueries;
      
 #pragma warning disable 0649
-        [Import(AllowDefault = true)]
+        [Import(AllowDefault = true,AllowRecomposition = true)]
         private IResourceQuerierFactory _querierFactory;
 
         [Import]
@@ -69,12 +69,14 @@ namespace Dataspace.Common.Services
 
         private Query FindInCache(Guid key,string nmspace,ParameterNames parameters)
         {
-            return _cachedQueries.FirstOrDefault(k => k.ResourceKey == key && k.Namespace == nmspace && k.Arguments == parameters);
+            lock (_cachedQueries)
+               return _cachedQueries.FirstOrDefault(k => k.ResourceKey == key && k.Namespace == nmspace && k.Arguments == parameters);
         }       
 
         private void AddQueryToCache(Query query)
         {
-            _cachedQueries.Add(query);
+            lock (_cachedQueries)
+               _cachedQueries.Add(query);
         }
 
         private Query BuildOrFindQueryToExecute(Type type, string nmspace, ParameterNames parameters)

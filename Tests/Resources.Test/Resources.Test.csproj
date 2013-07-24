@@ -66,7 +66,7 @@
     <Compile Include="Queries\ParamNamesTest.cs" />
     <Compile Include="Queries\QueriesTest.cs" />
     <Compile Include="Utility\AccumulationDictionaryTest.cs" />
-    <Compile Include="Caching\BalancingTest.cs" />
+    <Compile Include="Caching\StrictBalancingTest.cs" />
     <Compile Include="Caching\ComparerCheck.cs" />
     <Compile Include="Caching\SecondLevelCacheTest2.cs" />
     <Compile Include="Utility\IndexedCollectionTest.cs" />

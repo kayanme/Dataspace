@@ -18,7 +18,7 @@ using TestElementCache = Dataspace.Common.Utility.Dictionary.UpgradedCache<Syste
 namespace Resources.Test
 {
     [TestClass]        
-    public class CachingDictionaryTest
+    public sealed class CachingDictionaryTest
     {
   
         [Serializable]
@@ -53,6 +53,7 @@ namespace Resources.Test
             element = dictionary.RetrieveByFunc(key, GetElement());
             Assert.AreEqual(element.Value, key);
             Assert.AreEqual(element.Updated, 0);
+            dictionary.Dispose();
         }
 
 
@@ -78,14 +79,14 @@ namespace Resources.Test
         [TestCategory("Caching")]
         public void ParallelCachingDictionaryTests()
         {
-            var dictionary = new TestElementCache(queueRebalance: a => Task.Factory.StartNew(a));
-            var keys = 10000.Times().Select(k => Guid.NewGuid()).ToArray();
+            var dictionary = new TestElementCache(queueRebalance: a => Task.Factory.StartNew(a,TaskCreationOptions.AttachedToParent));
+            var keys = 1000.Times().Select(k => Guid.NewGuid()).ToArray();
             var locks = keys.ToDictionary(k => k, k => new object());
             keys.Concat(keys)
                 .AsParallel()
                 .WithDegreeOfParallelism(20)
                 .ForAll(key => TestKey(dictionary, key,locks[key]));
-
+            dictionary.Dispose();
 
         }
 
@@ -95,7 +96,7 @@ namespace Resources.Test
         public void ParallelCachingWithRandomFlushDictionaryTests()
         {
             var rnd = new Random();
-            var dictionary = new TestElementCache(queueRebalance: a => Task.Factory.StartNew(a));
+            var dictionary = new TestElementCache(queueRebalance: a => Task.Factory.StartNew(a, TaskCreationOptions.AttachedToParent));
             var keys = 10000.Times().Select(k =>rnd.Next(10000) == 1?Guid.NewGuid():Guid.Empty).ToArray();
             var locks = keys.Where(k=>k!=Guid.Empty).ToDictionary(k => k, k => new object());
             keys.Concat(keys)                
@@ -108,6 +109,7 @@ namespace Resources.Test
                                 else
                                     TestKey(dictionary, key,locks[key]);
                             });
+            dictionary.Dispose();
         }
 
 
@@ -127,6 +129,7 @@ namespace Resources.Test
             Assert.IsTrue(res);
             Assert.AreEqual(key,fl.Element.Value);
             Assert.AreEqual(0,test.SecondLevel.Count);
+            dictionary.Dispose();
         }
 
         [TestMethod]
@@ -145,6 +148,7 @@ namespace Resources.Test
             var res = test.FirstLevel.TryGetValue(key, out fl);
             Assert.IsFalse(res);           
             Assert.AreEqual(0, test.SecondLevel.Count);
+            dictionary.Dispose();
         }
 
         [TestMethod]
@@ -163,6 +167,7 @@ namespace Resources.Test
             Assert.IsFalse(res);
             Assert.AreEqual(1, test.SecondLevel.Count);
             Assert.AreEqual(key, test.SecondLevel[key].Element.Value);
+            dictionary.Dispose();
         }
 
         [TestMethod]
@@ -183,6 +188,7 @@ namespace Resources.Test
             Assert.IsFalse(res);
             Assert.AreEqual(1, test.SecondLevel.Count);
             Assert.AreEqual(key, test.SecondLevel[key].Element.Value);
+            dictionary.Dispose();
         }
 
         [TestMethod]
@@ -202,6 +208,7 @@ namespace Resources.Test
             Assert.IsTrue(res);
             Assert.AreEqual(key, fl.Element.Value);
             Assert.AreEqual(0, test.SecondLevel.Count);
+            dictionary.Dispose();
         }
 
         [TestMethod]
@@ -222,6 +229,7 @@ namespace Resources.Test
             Assert.IsFalse(res);          
             Assert.AreEqual(1, test.SecondLevel.Count);
             Assert.AreEqual(1, val.Updated);
+            dictionary.Dispose();
         }
 
         [TestMethod]
@@ -245,7 +253,7 @@ namespace Resources.Test
             Assert.AreEqual(1, test.SecondLevel.Count);
             Assert.IsFalse(test.SecondLevel[key].NeedUpdate());
             Assert.AreEqual(2, val.Updated);
-      
+            dictionary.Dispose();
         }
 
         [TestMethod]

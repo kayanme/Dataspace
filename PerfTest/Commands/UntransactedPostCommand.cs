@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dataspace.Common.Interfaces;
 using Indusoft.Test.MockresourceProviders;
 using PerfTest.Classes;
+using PerfTest.Metadata;
 
 namespace PerfTest.Commands
 {
@@ -13,28 +10,31 @@ namespace PerfTest.Commands
     {
         public override void Do(IGenericPool service)
         {
-           service.Post(_name,_id,_res);
+           service.Post(_name,_id,Res);
         }
 
         public override bool Check(Store store)
         {
-            var res = store.GetResource(CacheNode.ResourceAssembly.GetType(_name), _id) as ResBase;
-            return res.Payload == (_res as ResBase).Payload;
+            var res = store.GetResource(ResourceSpaceDescriptions.ResourceAssembly.GetType(_name), _id) as ResBase;
+            return res.Payload == (Res as ResBase).Payload;
         }
 
         private Guid _id;
 
         private string _name;
 
-        private object _res;
+        public ResBase Res { get; private set; }
 
-        public UntransactedPostCommand(Guid id, string name)
+        public UntransactedPostCommand(Guid id, string name,Guid? aff1,Guid? aff2,string nodeName)
         {
             _id = id;
             _name = name;
             var res = CreateResource(name);
             res.Payload = Guid.NewGuid();
-            _res = res;
+            res.ResourceAffinity1 = aff1;
+            res.ResourceAffinity2 = aff2;
+            res.NodeAffinity = nodeName;
+            Res = res;
         }
     }
 }

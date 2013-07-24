@@ -82,7 +82,7 @@ namespace Projections.Test.UnitTests
         {
             var parent = new ProjectionElement { Name = "parent" };
             var child = new ProjectionElement { Name = "child" };
-            var query1 = Query.CreateTestStubQuery("", null, "notParent");           
+            var query1 = Query.CreateTestStubQuery("", null);           
             var relation = new Relation
             {
                 ParentElement = parent,
@@ -102,8 +102,8 @@ namespace Projections.Test.UnitTests
         {
             var parent = new ProjectionElement { Name = "parent" };
             var child = new ProjectionElement { Name = "child" };
-            var query2 = Query.CreateTestStubQuery("", null, "notParent","name");
-            var query1 = Query.CreateTestStubQuery("", null, "notParent");
+            var query2 = Query.CreateTestStubQuery("", null,"name");
+            var query1 = Query.CreateTestStubQuery("", null);
             var relation = new Relation
             {
                 ParentElement = parent,
@@ -123,8 +123,8 @@ namespace Projections.Test.UnitTests
         {
             var parent = new ProjectionElement { Name = "parent" };
             var child = new ProjectionElement { Name = "child" };
-            var query2 = Query.CreateTestStubQuery("", null, "notParent", "name");
             var query1 = Query.CreateTestStubQuery("", null, "parent");
+            var query2 = Query.CreateTestStubQuery("", null, "name");          
             var relation = new Relation
             {
                 ParentElement = parent,
@@ -135,7 +135,7 @@ namespace Projections.Test.UnitTests
                                                  }
             };
             var bestQuery = relation.SelectTheBestQuery(new[] { new BoundingParameter("name", 1) }).First();
-            Assert.AreSame(query2, bestQuery);
+            Assert.AreSame(query1, bestQuery);
         }
 
         [TestMethod]

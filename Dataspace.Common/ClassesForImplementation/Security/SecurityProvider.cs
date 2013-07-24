@@ -177,7 +177,7 @@ namespace Dataspace.Common.ClassesForImplementation.Security
             Contract.Requires(storage != null);
             Contract.Ensures(Contract.Result<Accumulator<Guid, SecurityToken>>() != null);
             return new Accumulator<Guid, SecurityToken>(
-                (id,value) =>  storage.Push(ConvertToString(id, context.SessionCode), value),
+                (id,value,time) =>  storage.Push(ConvertToString(id, context.SessionCode), value,time),
                 (id)=>storage.HasActualValue(ConvertToString(id, context.SessionCode)),
                 (id)=>storage.RetrieveByFunc(ConvertToString(id, context.SessionCode),ss => GetToken(id)) as SecurityToken,                
                 ids =>

@@ -78,6 +78,11 @@ namespace Resources.Notification.Test.Resource.Level2Providers
             _changed.Add(eventArgs.Resource);
         }
 
+        public void Shutdown()
+        {
+            container.Dispose();
+        }
+
         public void Unsubscribe()
         {
             var subscriptor = container.GetExportedValue<IAnnouncerSubscriptor>();

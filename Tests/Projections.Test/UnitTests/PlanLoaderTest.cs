@@ -94,7 +94,7 @@ namespace Hierarchies.Test
             Assert.AreEqual("Element", value.DownRelations[0].ChildElement.Name);
             Assert.AreEqual(1, value.DownRelations[0].ChildElement.DownRelations.Count);
             Assert.AreEqual("Attribute", value.DownRelations[0].ChildElement.DownRelations[0].ChildElement.Name);
-            Assert.AreEqual(3, value.DownRelations[0].ChildElement.DownRelations[0].Queries.Count());
+            Assert.AreEqual(5, value.DownRelations[0].ChildElement.DownRelations[0].Queries.Count());
         }
 
 

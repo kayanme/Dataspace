@@ -54,6 +54,9 @@ namespace Dataspace.Common.Services
 
         [ImportMany(typeof (ResourcePoster))] 
         private IEnumerable<Lazy<ResourcePoster,ActivationSwitchAttribute>> writers;
+
+        [Import(RequiredCreationPolicy = CreationPolicy.Shared)]         
+        private DataStore.DataStoreServicesPackage _servicesPackage;
 #pragma warning restore 0649
 
         #endregion
@@ -124,9 +127,8 @@ namespace Dataspace.Common.Services
             Debug.Assert(provider != null);
             Debug.Assert(poster != null || registration.IsCacheData);
 
-            var store = new DataStore(registration.ResourceName,provider, poster);
-          
-            _container.Container.SatisfyImportsOnce(store);
+            var store = new DataStore(registration.ResourceName, provider, poster, _servicesPackage);
+                    
             _container.Container.ComposeExportedValue(store);
           
 

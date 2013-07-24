@@ -39,3 +39,4 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("Resources.Notification.Test")]
 [assembly: InternalsVisibleTo("ParsingServices.Test")]
 [assembly: InternalsVisibleTo("Resources.Selector.Test")]
+[assembly: InternalsVisibleTo("TwoLevelCachePerfomance")]

@@ -16,22 +16,23 @@ namespace Dataspace.Common.Transactions
         private readonly Dictionary<Transaction, TransactionPacketStorage> _transactionResources = new Dictionary<Transaction, TransactionPacketStorage>();
 
        
-        private T GetStorage<T>(Lazy<T> creator, Dictionary<Transaction, T> localstorage) where T : IPromotableSinglePhaseNotification
+        private T GetStorage<T>(Func<T> creator, Dictionary<Transaction, T> localstorage) where T : IEnlistmentNotification
         {
             lock (localstorage)
             {
                 var key = Transaction.Current;
                 if (localstorage.ContainsKey(key))
                     return localstorage[key];
-                var storage = creator.Value;
+                var storage = creator();
                 localstorage.Add(key,storage);
                 Transaction.Current.TransactionCompleted += KillStorage<T>;
-                Transaction.Current.EnlistPromotableSinglePhase(storage);
+                Transaction.Current.EnlistVolatile(storage,EnlistmentOptions.EnlistDuringPrepareRequired);
+               
                 return storage;
             }
         }
 
-        public TransactionPacketStorage GetResourceStorage(Lazy<TransactionPacketStorage> creator)
+        public TransactionPacketStorage GetResourceStorage(Func<TransactionPacketStorage> creator)
         {
             return GetStorage(creator, _transactionResources);
         }

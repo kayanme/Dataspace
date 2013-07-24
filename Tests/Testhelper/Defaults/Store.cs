@@ -16,7 +16,7 @@ namespace Indusoft.Test.MockresourceProviders
     {
         public  static bool WasGettings = false;
 
-        public static TimeSpan GetDelay = TimeSpan.FromSeconds(0.0005);
+        public static TimeSpan GetDelay = TimeSpan.FromSeconds(0);
 
         private const bool _useInheritance = true;
 
@@ -26,6 +26,8 @@ namespace Indusoft.Test.MockresourceProviders
         {
             get { return _caches[type]; }
         }
+
+        
 
         public void AddResource(Type name, Guid id, object obj)
         {
@@ -53,8 +55,7 @@ namespace Indusoft.Test.MockresourceProviders
 
         public object GetResource(Type name, Guid id)
         {
-            WasGettings = true;
-            Thread.Sleep(GetDelay);
+            WasGettings = true;         
             var cache = _caches[name];
             lock (cache)
             {

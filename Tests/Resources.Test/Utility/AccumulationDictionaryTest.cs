@@ -38,7 +38,7 @@ namespace Resources.Test
                           .Select(k => new Store {Key = k.Item1, Name = k.Item2})
                           .ToDictionary(k => k.Key));
             var accDict = new Accumulator<Guid, Store>(
-                (k,v)=>_repository.AddOrUpdate(k,v,(l,m)=>v),
+                (k,v,t)=>_repository.AddOrUpdate(k,v,(l,m)=>v),
                 _repository.ContainsKey,
                 key=>_repository[key],
                 k=>k.Select(Get).ToDictionary(k2=>k2.Key));
@@ -117,8 +117,8 @@ namespace Resources.Test
         [TestCategory("AccumulatingDictionary")]
         public void ParallelPartitions()
         {
-            const int count = 200000;
-            const int seqLength = 200000;
+            const int count = 2000;
+            const int seqLength = 2000;
             const int seqCount = 15;
 
             var dict = Initialize(count);

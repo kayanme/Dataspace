@@ -32,6 +32,8 @@ namespace Dataspace.Common.Utility.Dictionary
 
         internal const int PathCount = 2;
 
+        internal static DateTime? TestCurrentTime;
+
         private  CacheNode<TKey, TValue> _parent;
 
         private CacheNode<TKey, TValue> _leftFix;
@@ -52,9 +54,9 @@ namespace Dataspace.Common.Utility.Dictionary
 
         private readonly IStatChannel _channel;
 
-        private readonly Action _decCount;
+        private readonly Action<DateTime> _decCount;
 
-        private readonly int _maxFixedBranchDepth;
+        private int _maxFixedBranchDepth;
 
         private float GetProbability()
         {
@@ -127,15 +129,28 @@ namespace Dataspace.Common.Utility.Dictionary
             }
             try
             {
-                GetParent().FixChild(this, path);
+                var parent = GetParent();
+                if (parent != null)
+                  parent.FixChild(this, path);
             }
             catch (NullReferenceException) //эта ошибка может случиться только два раза в корневой ноде, быстрее так
             {
             }
             node._leftFix = null;
             node._rightFix = null;
-            if (node._depth[path]<=_maxFixedBranchDepth || Settings.NoCacheGarbageChecking)//исключительно для тестирования
-                FixChild(node,path);
+            FixOrUnfixDueToBranchDepth(node, path);            
+        }
+
+        private void FixOrUnfixDueToBranchDepth(CacheNode<TKey,TValue> node,int path)
+        {
+            if (node._depth[path] <= _maxFixedBranchDepth 
+             || node.HasLeftNode(path) || node.HasRightNode(path)
+             || Settings.NoCacheGarbageChecking)//исключительно для тестирования
+                FixChild(node, path);
+            else 
+            {
+                UnfixChild(node,path);                
+            }
         }
 
         private void FixChild(CacheNode<TKey, TValue> node,int path)
@@ -146,32 +161,46 @@ namespace Dataspace.Common.Utility.Dictionary
                 _rightFix = node;         
         }
 
-        private void UnfixChild(CacheNode<TKey, TValue> node)
+        private void UnfixChild(CacheNode<TKey, TValue> node,int path)
         {
-            if (node.Equals(_leftFix))
+            if (node.Equals(GetLeftNode(path)))
                 _leftFix = null;
-            else if (node.Equals(_rightFix))
+            else if (node.Equals(GetRightNode(path)))
                 _rightFix = null;          
         }
 
-        public TValue FindNode(TKey key,int path,out int depth)
+        public void UpdateMaxBranchDepth(int path,int newDepth)
         {
-           
+            _maxFixedBranchDepth = newDepth;
+            _parent = GetParent();
+            if (_parent!=null)
+              _parent.FixOrUnfixDueToBranchDepth(this, path);
+            if (HasLeftNode(path))
+                GetLeftNode(path).UpdateMaxBranchDepth(path,newDepth);
+            if (HasRightNode(path))
+                GetRightNode(path).UpdateMaxBranchDepth(path, newDepth);
+        }
+
+        public TValue FindNode(TKey key, int path, out int depth)
+        {
+
             var moreOrLess = _comparer.Compare(_key, key);
             if (moreOrLess == 0)
             {
                 depth = _depth[path];
                 return _content;
             }
-            else if (moreOrLess > 0 && HasLeftNode(path))
-                return GetLeftNode(path).FindNode(key, path, out depth);
-            else if (moreOrLess < 0 && HasRightNode(path))
-                return GetRightNode(path).FindNode(key, path, out depth);
-            else            
-            {
-                depth = _depth[path];
-                return default(TValue);            
-        }
+            var left = GetLeftNode(path);
+            if (moreOrLess > 0 && left!=null)
+                return left.FindNode(key, path, out depth);
+
+            var right = GetRightNode(path);
+            if (moreOrLess < 0 && right!=null)
+                return right.FindNode(key, path, out depth);
+
+            depth = _depth[path];
+            return default(TValue);
+
         }
 
         public IEnumerable<TKey>  GetKeys(int path)
@@ -264,7 +293,7 @@ namespace Dataspace.Common.Utility.Dictionary
         public CacheNode(TKey key, TValue element, int maxBranchDepth,
             IComparer<TKey> comparer,
             IStatChannel channel = null,
-            Action decCount = null,
+            Action<DateTime> decCount = null,
             Func<TValue,float> probabilityCalc = null)
         {           
             _content = element;
@@ -348,14 +377,14 @@ namespace Dataspace.Common.Utility.Dictionary
                         && !parent.HasRightNode(i)
                         && parent._depth[i]>_maxFixedBranchDepth)
                     {
-                        grandparent.UnfixChild(parent);
+                        grandparent.UnfixChild(parent,i);
                      
                     }
                 
                 }
             }
             if (_decCount!=null)
-              _decCount();
+              _decCount(TestCurrentTime??DateTime.Now);
         }
     }
 }

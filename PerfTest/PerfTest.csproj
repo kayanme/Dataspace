@@ -48,9 +48,14 @@
     <Compile Include="Classes\NodeDownlink.cs" />
     <Compile Include="Classes\NodeUplink.cs" />
     <Compile Include="Classes\ResBase.cs" />
-    <Compile Include="Classes\ResourceTestSystemInitiation.cs" />
+    <Compile Include="Commands\UntransactedGetManyCommand.cs" />
+    <Compile Include="Commands\UntransactedDeleteCommand.cs" />
+    <Compile Include="Metadata\ResourceTestSystemInitiation.cs" />
+    <Compile Include="Classes\StoreQuerier.cs" />
+    <Compile Include="Commands\QueryCommand.cs" />
     <Compile Include="Commands\UntransactedGetCommand.cs" />
     <Compile Include="Commands\UntransactedPostCommand.cs" />
+    <Compile Include="Metadata\ResourceSpaceDescriptions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

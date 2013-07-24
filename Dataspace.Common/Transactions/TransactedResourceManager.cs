@@ -11,18 +11,19 @@ using Dataspace.Common.ClassesForImplementation;
 using Dataspace.Common.Data;
 using Dataspace.Common.Interfaces;
 using Dataspace.Common.Interfaces.Internal;
+using Dataspace.Common.Services;
 
 
 namespace Dataspace.Common.Transactions
 {
     [Export]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     internal class TransactedResourceManager
     {
 #pragma warning disable 0649
    
-        [Import(RequiredCreationPolicy = CreationPolicy.NonShared)] 
-        private Lazy<TransactionPacketStorage>   _transactedResourceStore;
+        [Import] 
+        private SerialPoster  _poster;
 
         [Import(RequiredCreationPolicy = CreationPolicy.Shared)] 
         private TransactionStoragesStorage _centralStore;
@@ -38,7 +39,7 @@ namespace Dataspace.Common.Transactions
                 poster(description.ResourceKey, resource);
             else
             {
-                var transactedResourceStorage = _centralStore.GetResourceStorage(_transactedResourceStore);
+                var transactedResourceStorage = _centralStore.GetResourceStorage(() => new TransactionPacketStorage(_poster));
                 transactedResourceStorage.AddResourceToPost(new DataRecord
                 {
                     Content = description,
@@ -52,7 +53,7 @@ namespace Dataspace.Common.Transactions
         public DataRecord GetResource(UnactualResourceContent description)
         {
             Contract.Requires(Transaction.Current != null);
-            var transactedResourceStorage = _centralStore.GetResourceStorage(_transactedResourceStore);
+            var transactedResourceStorage = _centralStore.GetResourceStorage(()=>new TransactionPacketStorage(_poster));
             return transactedResourceStorage.GetResource(description);
         }
 

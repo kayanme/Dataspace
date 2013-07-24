@@ -12,5 +12,11 @@ namespace PerfTest.Classes
     public class ResBase
     {
         public Guid Payload { get; set; }
+
+        public Guid? ResourceAffinity1 { get; set; }
+
+        public Guid? ResourceAffinity2 { get; set; }
+
+        public string NodeAffinity { get; set; }
     }
 }

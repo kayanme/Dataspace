@@ -7,7 +7,7 @@ using Dataspace.Common.ClassesForImplementation;
 
 namespace Dataspace.Common.Data
 {
-    public struct DataRecord
+    public class DataRecord
     {
         public UnactualResourceContent Content { get; internal set; }
         public object Resource { get; internal set; }

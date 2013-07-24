@@ -48,11 +48,11 @@ namespace Dataspace.Common.Projections.Classes.Descriptions
         private FrameNode CreateNewNode(FrameNode parent, Guid k)
         {
             var newDict = new Dictionary<string, object>(parent.BoundingParameters);
-            if (newDict.ContainsKey(MatchedElement.Name))
-                newDict[MatchedElement.Name] = k;
+            if (newDict.ContainsKey(ProducedChildElement.Name))
+                newDict[ProducedChildElement.Name] = k;
             else
             {
-                newDict.Add(MatchedElement.Name, k);
+                newDict.Add(ProducedChildElement.Name, k);
             }
             return new FrameNode(k, ProducedChildElement, parent.Depth + 1, newDict);
 

@@ -33,6 +33,12 @@ namespace Hierarchies.Test.Data
             Settings.NoCacheGarbageChecking = true;
         }
 
+        [TestCleanup]
+        public void Shutdown()
+        {
+            container.Dispose();
+        }
+
         private Element rootElement;
         private Attribute attr1;
         private Attribute attr2;

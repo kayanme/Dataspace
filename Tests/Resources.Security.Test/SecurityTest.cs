@@ -22,7 +22,7 @@ namespace Resources.Security.Test
         private Element _dependentElement;
         private Model _dependentModel;
 
-     
+        private CompositionContainer _container;
 
         protected Assembly[] AssembliesWhichShouldProvideExport
         {
@@ -266,7 +266,7 @@ namespace Resources.Security.Test
         [TestInitialize]
         public void Preparation()
         {
-            var container =
+            _container =
                 new CompositionContainer(new AggregateCatalog(AssembliesWhichShouldProvideExport.Select(k=>new AssemblyCatalog(k))));
                 
 
@@ -279,11 +279,17 @@ namespace Resources.Security.Test
             pool.Models.Add(_dependentModel.Key, _dependentModel);
             pool.Elements.Add(_singleElement.Key, _singleElement);
             pool.Elements.Add(_dependentElement.Key, _dependentElement);
-            
-            container.ComposeExportedValue(pool);
-            container.ComposeExportedValue(container);
+
+            _container.ComposeExportedValue(pool);
+            _container.ComposeExportedValue(_container);
             Settings.NoCacheGarbageChecking = true;
-            _cachier = container.GetExportedValue<ITypedPool>();         
-        }      
+            _cachier = _container.GetExportedValue<ITypedPool>();         
+        }
+
+        [TestCleanup]
+        public void Shutdown()
+        {
+            _container.Dispose();
+        }
     }
 }

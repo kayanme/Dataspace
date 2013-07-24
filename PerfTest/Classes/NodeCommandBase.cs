@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Indusoft.Test.MockresourceProviders;
+using PerfTest.Metadata;
 
 namespace PerfTest.Classes
 {
@@ -15,12 +16,12 @@ namespace PerfTest.Classes
 
         protected ResBase CreateResource(string name)
         {
-            return CacheNode.ResourceAssembly.CreateInstance(name) as ResBase;
+            return ResourceSpaceDescriptions.ResourceAssembly.CreateInstance(name) as ResBase;
         }
 
         protected Type GetResourceType(string name)
         {
-            return CacheNode.ResourceAssembly.GetType(name);
+            return ResourceSpaceDescriptions.ResourceAssembly.GetType(name);
         }
     }
 }

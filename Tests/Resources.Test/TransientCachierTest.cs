@@ -471,8 +471,13 @@ namespace Resources.Test
             _container.ComposeExportedValue(pool);
             _container.ComposeExportedValue(_container);
             Settings.NoCacheGarbageChecking = true;
-        }      
+        }
 
-     
+        [TestCleanup]
+        public void Shutdown()
+        {
+            _container.Dispose();
+        }
+
     }
 }

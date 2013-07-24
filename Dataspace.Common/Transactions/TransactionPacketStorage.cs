@@ -16,7 +16,7 @@ using Dataspace.Common.Services;
 namespace Dataspace.Common.Transactions
 {
     [Export]
-    internal class TransactionPacketStorage : IPromotableSinglePhaseNotification, IDisposable
+    internal class TransactionPacketStorage : IPromotableSinglePhaseNotification,IEnlistmentNotification, IDisposable
     {
 
         private readonly SerialPoster _poster;
@@ -79,7 +79,7 @@ namespace Dataspace.Common.Transactions
                             record.Resource = _formatter.Deserialize(_stream);
                         }
                         _resourceWriterQueueLock.EnterWriteLock();
-                        if (existingResource.Content != null) //если найден уже записанный в данной транзакции ресурс
+                        if (existingResource != null) //если найден уже записанный в данной транзакции ресурс
                             existingResource.Resource = record.Resource;
                         else
                             _resourcesToWrite.Enqueue(record);
@@ -154,13 +154,50 @@ namespace Dataspace.Common.Transactions
 
         public void SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
         {
-            WriteResources();
-            singlePhaseEnlistment.Committed();
+            try
+            {
+                WriteResources();
+                singlePhaseEnlistment.Committed();
+            }
+            catch
+            {
+                singlePhaseEnlistment.Aborted();
+                throw;
+            }
         }
 
         public void Rollback(SinglePhaseEnlistment singlePhaseEnlistment)
         {
             singlePhaseEnlistment.Aborted();
+        }
+
+        public void Prepare(PreparingEnlistment preparingEnlistment)
+        {
+            try
+            {
+                WriteResources();
+             preparingEnlistment.Prepared();
+            }
+            catch (Exception ex)
+            {
+            preparingEnlistment.ForceRollback(ex);
+             throw;
+            }
+        }
+
+        public void Commit(Enlistment enlistment)
+        {
+            enlistment.Done();
+        }
+
+        public void Rollback(Enlistment enlistment)
+        {
+           enlistment.Done();
+        }
+
+        public void InDoubt(Enlistment enlistment)
+        {
+            enlistment.Done();
         }
     }
 }

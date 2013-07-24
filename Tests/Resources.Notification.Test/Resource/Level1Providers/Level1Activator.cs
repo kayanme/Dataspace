@@ -67,7 +67,10 @@ namespace Resources.Notification.Test.Resource.Level1Providers
             }
         }
 
-
+        public void Shutdown()
+        {
+            container.Dispose();
+        }
        
         public void Complete()
         {

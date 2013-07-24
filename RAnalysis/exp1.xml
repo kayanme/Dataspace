@@ -1,0 +1,53 @@
+﻿<Results xmlns="Empty">
+  <expData>
+    <Experiment Name="Experiment 0">
+      <Configuration KeyCount="500" TryCount="500000" GarbageCollectingRate="500000" RebalanceActive="true" MaxFixedCache2BranchLength="9" ParallelWork="false" RebalancingMode="Light" />
+      <DataCollected>
+        <DataRow ProbabilitiesStability="0.082607433290324134" ExpectedRate="1" Rate="8.0821533203125" AverageTime="5" C1ItemsCount="48" C2ItemsCount="348" C2ItemsGone="1042" />
+        <Event>Tree was rebalanced</Event>
+        <DataRow ProbabilitiesStability="0.040147519161318257" ExpectedRate="7.6406097412109375" Rate="8.5" AverageTime="3" C1ItemsCount="49" C2ItemsCount="330" C2ItemsGone="977" />
+        <DataRow ProbabilitiesStability="0.024350108337466279" ExpectedRate="7.6406097412109375" Rate="8.6519718170166016" AverageTime="5" C1ItemsCount="80" C2ItemsCount="331" C2ItemsGone="1460" />
+        <DataRow ProbabilitiesStability="0.020400466177552302" ExpectedRate="7.6406097412109375" Rate="9.1261262893676758" AverageTime="5" C1ItemsCount="43" C2ItemsCount="400" C2ItemsGone="1409" />
+      </DataCollected>
+      <Summary Tries="500000" ProbStability="0.0418763817416652" ExpRate="5.9804573059082" Rate="8.59006285667419" AvgTime="4.5" Cache1Items="55" Cache2Items="352.25" Cache2ItemsGone="1222" />
+    </Experiment>
+  </expData>
+  <expData>
+    <Experiment Name="Experiment 1">
+      <Configuration KeyCount="500" TryCount="500000" GarbageCollectingRate="500000" RebalanceActive="true" MaxFixedCache2BranchLength="9" ParallelWork="false" RebalancingMode="Heavy" />
+      <DataCollected>
+        <DataRow ProbabilitiesStability="0.082607433290324134" ExpectedRate="1" Rate="8.3851852416992188" AverageTime="4" C1ItemsCount="41" C2ItemsCount="400" C2ItemsGone="565" />
+        <DataRow ProbabilitiesStability="0.040147519161318257" ExpectedRate="1" Rate="8.1000003814697266" AverageTime="3" C1ItemsCount="43" C2ItemsCount="390" C2ItemsGone="954" />
+        <DataRow ProbabilitiesStability="0.024350108337466279" ExpectedRate="1" Rate="8.5785121917724609" AverageTime="3" C1ItemsCount="44" C2ItemsCount="405" C2ItemsGone="884" />
+        <DataRow ProbabilitiesStability="0.020400466177552302" ExpectedRate="1" Rate="8.5" AverageTime="4" C1ItemsCount="47" C2ItemsCount="398" C2ItemsGone="1169" />
+        <Event>Tree was rebalanced</Event>
+      </DataCollected>
+      <Summary Tries="500000" ProbStability="0.0418763817416652" ExpRate="1" Rate="8.39092445373535" AvgTime="3.5" Cache1Items="43.75" Cache2Items="398.25" Cache2ItemsGone="893" />
+    </Experiment>
+  </expData>
+  <expData>
+    <Experiment Name="Experiment 2">
+      <Configuration KeyCount="500" TryCount="500000" GarbageCollectingRate="500000" RebalanceActive="true" MaxFixedCache2BranchLength="9" ParallelWork="false" RebalancingMode="Mixed" />
+      <DataCollected>
+        <DataRow ProbabilitiesStability="0.082607433290324134" ExpectedRate="1" Rate="8.3056869506835938" AverageTime="5" C1ItemsCount="45" C2ItemsCount="388" C2ItemsGone="969" />
+        <Event>Tree was rebalanced</Event>
+        <DataRow ProbabilitiesStability="0.040147519161318257" ExpectedRate="6.6143388748168945" Rate="6.8733510971069336" AverageTime="2" C1ItemsCount="32" C2ItemsCount="416" C2ItemsGone="638" />
+        <DataRow ProbabilitiesStability="0.024350108337466279" ExpectedRate="6.6143388748168945" Rate="6.7671232223510742" AverageTime="1" C1ItemsCount="23" C2ItemsCount="436" C2ItemsGone="208" />
+        <DataRow ProbabilitiesStability="0.020400466177552302" ExpectedRate="6.6143388748168945" Rate="6.7922077178955078" AverageTime="1" C1ItemsCount="26" C2ItemsCount="433" C2ItemsGone="212" />
+      </DataCollected>
+      <Summary Tries="500000" ProbStability="0.0418763817416652" ExpRate="5.21075415611267" Rate="7.18459224700928" AvgTime="2.25" Cache1Items="31.5" Cache2Items="418.25" Cache2ItemsGone="506.75" />
+    </Experiment>
+  </expData>
+  <expData>
+    <Experiment Name="Experiment 3">
+      <Configuration KeyCount="500" TryCount="500000" GarbageCollectingRate="500000" RebalanceActive="false" MaxFixedCache2BranchLength="9" ParallelWork="false" RebalancingMode="Heavy" />
+      <DataCollected>
+        <DataRow ProbabilitiesStability="0.082607433290324134" ExpectedRate="1" Rate="8.1734695434570312" AverageTime="5" C1ItemsCount="51" C2ItemsCount="348" C2ItemsGone="1168" />
+        <DataRow ProbabilitiesStability="0.040147519161318257" ExpectedRate="1" Rate="7.9210524559021" AverageTime="4" C1ItemsCount="41" C2ItemsCount="390" C2ItemsGone="1094" />
+        <DataRow ProbabilitiesStability="0.024350108337466279" ExpectedRate="1" Rate="8.5306119918823242" AverageTime="4" C1ItemsCount="45" C2ItemsCount="389" C2ItemsGone="1108" />
+        <DataRow ProbabilitiesStability="0.020400466177552302" ExpectedRate="1" Rate="8.4969882965087891" AverageTime="3" C1ItemsCount="35" C2ItemsCount="408" C2ItemsGone="754" />
+      </DataCollected>
+      <Summary Tries="500000" ProbStability="0.0418763817416652" ExpRate="1" Rate="8.28053057193756" AvgTime="4" Cache1Items="43" Cache2Items="383.75" Cache2ItemsGone="1031" />
+    </Experiment>
+  </expData>
+</Results>

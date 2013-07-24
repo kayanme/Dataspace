@@ -118,7 +118,6 @@
     <Compile Include="Defaults\Querier.cs" />
     <Compile Include="Defaults\Writer.cs" />
     <Compile Include="UnitTests\CommendationCollectionTest.cs" />
-    <Compile Include="UnitTests\NetUtilitiesTest.cs" />
     <Compile Include="UnitTests\PlanBuilderTests.cs" />
     <Compile Include="UnitTests\PlanLoaderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

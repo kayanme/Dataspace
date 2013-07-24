@@ -67,14 +67,14 @@ namespace Common.Utility.Dictionary
             }
         }
 
-        public float GetFrequency()
+        public float GetFrequency(DateTime? time = null)
         {
             bool lockTaken = false;
             try
             {
                 _lock.Enter(ref lockTaken);
-                var time = DateTime.Now;
-                var mSec = GetShiftFromLastTime(time);
+                time = time??DateTime.Now;
+                var mSec = GetShiftFromLastTime(time.Value);
                 return (float)_period/(_totalTime + mSec);
             }
             finally

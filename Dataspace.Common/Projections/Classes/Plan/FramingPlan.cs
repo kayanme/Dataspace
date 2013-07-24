@@ -68,6 +68,12 @@ namespace Dataspace.Common.Projections.Classes
         public ProjectionFrame MakeFrame(Guid id, int maxDepth, Dictionary<string, object> parameters)
         {
             var root = new FrameNode(id, _rootElement,1,parameters);
+            if (parameters.ContainsKey(_rootElement.Name))
+                parameters[_rootElement.Name] = id;
+            else
+            {
+                parameters.Add(_rootElement.Name,id);
+            }
             IEnumerable<FrameNodeGroup> currentLevel = new[]
                                    {
                                        new FrameNodeGroup(_rootElement, 
@@ -127,7 +133,7 @@ namespace Dataspace.Common.Projections.Classes
         public Dictionary<string,object> ConverseArguments(Dictionary<string,string> args)
         {
             //конверсии для параметра не будет, если он вообще не используется в проекции, но знать о нем на каждом шаге надо все равно, поэтому оставляем такой без конверсии
-            return args.ToDictionary(k => k.Key, k =>_primaryConversions.ContainsKey(k.Key)? _primaryConversions[k.Key](k.Value):k.Value);
+            return args.ToDictionary(k => k.Key, k =>_primaryConversions.ContainsKey(k.Key)? _primaryConversions[k.Key](k.Value):k.Value,StringComparer.InvariantCultureIgnoreCase);
         }
         
     }

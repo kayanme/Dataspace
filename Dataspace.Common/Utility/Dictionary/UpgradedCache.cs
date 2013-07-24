@@ -10,6 +10,7 @@ using Dataspace.Common.Statistics;
 using Dataspace.Common.Data;
 using Dataspace.Common.Statistics;
 using Common.Utility.Dictionary;
+using Dataspace.Common.Utility.Dictionary.SecondLevelCache;
 
 namespace Dataspace.Common.Utility.Dictionary
 {
@@ -30,7 +31,7 @@ namespace Dataspace.Common.Utility.Dictionary
 
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        private const int MaxItemsInLevel1ToActivateFlush = 50;
+        private const int MaxItemsInLevel1ToActivateFlush = 500;
 
         internal class TestMock
         {
@@ -100,6 +101,7 @@ namespace Dataspace.Common.Utility.Dictionary
 
         private void QueueRebalance(Action action)
         {
+            
             if (_collector != null)
                 _collector.AddAdditionActionToStatisticsQueue(action);
             else
@@ -144,7 +146,7 @@ namespace Dataspace.Common.Utility.Dictionary
             return flc;
         }
 
-        private TType TryGetFromSecondLevel(T id, Func<T, TType> value, bool withLock,out bool wasFound)
+        private TType TryGetFromSecondLevel(T id, Func<T, TType> value, bool withLock,DateTime? retrieveTime,out bool wasFound)
         {
             try
             {
@@ -155,7 +157,7 @@ namespace Dataspace.Common.Utility.Dictionary
                 if (element != null)
                 {
                     wasFound = true;
-                    element.FixTake(DateTime.Now);
+                    element.FixTake(retrieveTime??DateTime.Now);
                     if (!element.NeedUpdate())
                         return element.Element;
                     else
@@ -166,7 +168,7 @@ namespace Dataspace.Common.Utility.Dictionary
                                 _lock.EnterWriteLock();
                             if (element.NeedUpdate())
                             {
-                                var startGetTime = DateTime.Now;
+                                var startGetTime = retrieveTime ?? DateTime.Now;
                                 element.Element = value(id);
                                 element.DropUpdate(startGetTime);
                             }
@@ -215,8 +217,14 @@ namespace Dataspace.Common.Utility.Dictionary
             {
                 if (withLock)
                     _lock.EnterWriteLock();
-                _secondLevelCache.Add(id, element);
-                flc.TryRemove(id, out element);
+                if (flc.ContainsKey(id))//если из двух потоков пытается взять один и тот же ключ,
+                    //то к этому моменту они оба попытаются добавить ключ в кэш2.
+                    //Но это можно отследить, т.к. первый записавший удаляет ключ из кэша1.
+                {
+                    _secondLevelCache.Add(id, element);
+                    TElementType removedElement;
+                    flc.TryRemove(id, out removedElement);
+                }
                 return element.Element;
             }
             finally
@@ -226,10 +234,10 @@ namespace Dataspace.Common.Utility.Dictionary
             }
         }
 
-        private TType RetrieveCommon(T id, Func<T, TType> value, bool withLock)
+        private TType RetrieveCommon(T id, Func<T, TType> value, bool withLock,DateTime? retrieveTime)
         {
             bool wasFoundInSecondlevel;
-            var element = TryGetFromSecondLevel(id, value, withLock,out wasFoundInSecondlevel);
+            var element = TryGetFromSecondLevel(id, value, withLock,retrieveTime,out wasFoundInSecondlevel);
             if (wasFoundInSecondlevel)
                 return element;
             try
@@ -246,16 +254,16 @@ namespace Dataspace.Common.Utility.Dictionary
            
         }
 
-        public TType RetrieveByFunc(T id, Func<T, TType> value)
+        public TType RetrieveByFunc(T id, Func<T, TType> value,DateTime? retrieveTime = null)
         {
             Contract.Requires(value!=null);
             Debug.Assert(value != null,"Отсутствует функция получения");
-            return RetrieveCommon(id, value, true);
+            return RetrieveCommon(id, value, true, retrieveTime);
         }
 
-        public void Push(T id, TType value)
+        public void Push(T id, TType value,DateTime? pushTime = null)
         {
-             RetrieveCommon(id, k=>value,false);
+            RetrieveCommon(id, k => value, false, pushTime);
         }
 
         public void SetUpdateNecessity(T id,DateTime time)

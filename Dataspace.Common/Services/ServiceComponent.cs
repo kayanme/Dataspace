@@ -7,8 +7,6 @@ using System.Threading;
 using Dataspace.Common.Data;
 using Dataspace.Common.Interfaces;
 using Dataspace.Common.Interfaces.Internal;
-using Dataspace.Common.Interfaces.Internal;
-using Common.ParsingServices;
 
 namespace Dataspace.Common.Services
 {
@@ -58,9 +56,7 @@ namespace Dataspace.Common.Services
             {
                 try
                 {
-                    _initializationThread = true;
-                   if (_container != null)
-                       ParsingBlock.SetMefresolver(_container.Container);
+                    _initializationThread = true;               
                     foreach (var initializer in _initializers.OrderBy(k => k.Order))
                     {
                         initializer.Initialize();

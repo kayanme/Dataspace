@@ -10,11 +10,13 @@ using Dataspace.Common.Data;
 using Dataspace.Common.Statistics;
 using Dataspace.Common.Interfaces.Internal;
 using Common.Utility.Dictionary;
+using Dataspace.Common.Utility.Dictionary.SecondLevelCache;
 
 namespace Dataspace.Common.Utility.Dictionary
 {
-   
-    internal class SecondLevelCache<TKey,TValue>
+    public enum RebalancingMode { Heavy, Light, Hybrid }
+
+    internal class SecondLevelCache<TKey,TValue>:IDisposable
     {
         internal class MockChannel : IStatChannel
         {
@@ -47,31 +49,65 @@ namespace Dataspace.Common.Utility.Dictionary
         private long _getCount = 0;
         private float _expectedGet = 1;
         private int _currentPath = 0;
-        private int _maxFixedBranchDepth = 10;
+        private int _maxFixedBranchDepth = 6;
 
         private readonly Action<Action> _queueRebalance;
         private readonly Func<TValue, float> _frequencyCalc;
 
         private int _rebalancingQueued;
 
+        private CancellationToken _token;
+        private CancellationTokenSource _rebalancerStopper;
+
         private const int Queued = 1;
         private const int NotQueued = 0;
 
-        public const int CheckThreshold = 100;
-        public const float RebalancingDelta = 0.05F;
+     
+        private readonly CacheController<TKey, TValue> _cacheController;
+        private readonly UpdatableElement<TValue> _goneIntensity = new UpdatableElement<TValue>(default(TValue));
+        private int _writeTimeout = 50;
+
+        internal event EventHandler NodeGoneEvent;
+        /// <summary>
+        /// Происходит, когда нода не смогла записаться из-за длительной блокировки кэша.
+        /// </summary>
+        internal event EventHandler NodeLostEvent;
+
+        internal event EventHandler BranchLengthChangedEvent;
+
+        
 
         public class CacheState
         {
             private readonly SecondLevelCache<TKey, TValue> _cache;
 
+            internal event EventHandler NodeGone
+            {
+                add { _cache.NodeGoneEvent += value; }
+                remove { _cache.NodeGoneEvent -= value; }
+            }
+
+            internal event EventHandler NodeLost
+            {
+                add { _cache.NodeLostEvent += value; }
+                remove { _cache.NodeLostEvent -= value; }
+            }
+
+            internal event EventHandler BranchLengthChangedEvent
+            {
+                add { _cache.BranchLengthChangedEvent += value; }
+                remove { _cache.BranchLengthChangedEvent -= value; }
+            }
+
             public float Rate { get { return (float) _cache._totalAccessDepth/_cache._getCount; } }
             public float ExpectedRate { get { return _cache._expectedGet; } }
             public int CurrentPath { get { return _cache._currentPath; } }
             public bool RebalancingQueued { get { return _cache._rebalancingQueued == Queued; } }
-            public int MaxFixedBranchDepth { get { return _cache._maxFixedBranchDepth; } internal set { _cache._maxFixedBranchDepth = value; } }
-            public int CheckThreshold { get { return SecondLevelCache<TKey, TValue>.CheckThreshold; } }
-            public float RebalancingDelta { get { return SecondLevelCache<TKey, TValue>.RebalancingDelta; } }
-        
+            public int MaxFixedBranchDepth { get { return _cache._maxFixedBranchDepth; } internal set { _cache._maxFixedBranchDepth = value;_cache.UpdateBranchDepth(value); } }        
+            public int Count { get { return _cache.Count; } }
+            public float GoneIntensity { get { return _cache._goneIntensity.GetFrequency(); } }
+            public int WriteTimeout { get { return _cache._writeTimeout; } internal set { _cache._writeTimeout = value; } }
+            public CacheAdaptationSettings AdaptationSettings { get { return _cache._cacheController.Settings; } }   
 
             public CacheState(SecondLevelCache<TKey,TValue> cache)
             {
@@ -91,7 +127,7 @@ namespace Dataspace.Common.Utility.Dictionary
             get { return _cacheNodeCount; }
         }
 
-        private void QueueRebalance()
+        internal void QueueRebalance(RebalancingMode mode)
         {
             if (Interlocked.CompareExchange(ref _rebalancingQueued, Queued, NotQueued) == NotQueued)
             {
@@ -106,54 +142,89 @@ namespace Dataspace.Common.Utility.Dictionary
                                         try
                                         {
                                             _writeLock.Enter(ref lockTaken);
-                                            var rebalancer = CreateRebalancer();
-                                            _expectedGet = rebalancer.Rebalance();                                           
+                                            var rebalancer = CreateRebalancer(mode);
+                                            _expectedGet = rebalancer.Rebalance(_token);                                           
                                             _root = rebalancer.ConstructNewTreeAfterCalculation();
                                             _currentPath = rebalancer.OutPath;
+                                            rebalancer.Dispose();
                                         }
                                         finally
                                         {
-
+                                            time.Stop();
+                                            Channel.SendMessageAboutOneResource(Guid.Empty, Actions.RebalanceEnded,
+                                                                                time.Elapsed);                                         
+                                            _rebalancingQueued = NotQueued;                                            
                                             if (lockTaken)
                                                 _writeLock.Exit();
                                         }
-                                        time.Stop();
-                                        Channel.SendMessageAboutOneResource(Guid.Empty, Actions.RebalanceEnded,
-                                                                            time.Elapsed);
                                        
-                                        _rebalancingQueued = NotQueued;
                                     });
             }
         }
 
-        private void DecCount()
+      
+
+        private void DecCount(DateTime goneTime)
         {
+#if DEBUG
+            if (NodeGoneEvent != null)
+                NodeGoneEvent(this,new EventArgs());
+#endif
+            _goneIntensity.FixTake(goneTime);
             Interlocked.Decrement(ref _cacheNodeCount);
         }
 
         private SpinLock _writeLock = new SpinLock();
 
-        public void Add(TKey key,TValue value)
+        private void UpdateBranchDepth(int newBranchDepth)
         {
-
-          
             bool lockTaken = false;
             try
             {
-                _writeLock.Enter(ref lockTaken);
+                _writeLock.TryEnter(_writeTimeout, ref lockTaken);
+                if (BranchLengthChangedEvent !=null)
+                    BranchLengthChangedEvent(this,new EventArgs());
+                if (_root!=null)
+                  _root.UpdateMaxBranchDepth(_currentPath, newBranchDepth);
+            }
+            finally
+            {
 
-                if (Settings.CheckCycles && _root != null)
-                    if (!_root.CheckTree(_currentPath, _cacheNodeCount+1))
-                        Debugger.Break();
+                if (lockTaken)
+                    _writeLock.Exit();
+            }
+        }
 
-                if (_root == null)
-                    _root = new CacheNode<TKey, TValue>(key, value, _maxFixedBranchDepth, _comparer,Channel, DecCount, _frequencyCalc);
+        public void Add(TKey key,TValue value)
+        {          
+            bool lockTaken = false;
+            try
+            {
+                _writeLock.TryEnter(_writeTimeout, ref lockTaken);
+                if (lockTaken)
+                {
+                    if (Settings.CheckCycles && _root != null)
+                        if (!_root.CheckTree(_currentPath, _cacheNodeCount + 1))
+                            Debugger.Break();
+
+                    if (_root == null)
+                        _root = new CacheNode<TKey, TValue>(key, value, _maxFixedBranchDepth, _comparer, Channel,
+                                                            DecCount, _frequencyCalc);
+                    else
+                        _root.AddNode(key, value, _maxFixedBranchDepth, _currentPath);
+
+                    if (Settings.CheckCycles && _root != null)
+                        if (!_root.CheckTree(_currentPath, _cacheNodeCount + 1))
+                            Debugger.Break();
+                    Interlocked.Increment(ref _cacheNodeCount);
+                }
                 else
-                    _root.AddNode(key, value, _maxFixedBranchDepth, _currentPath);
-
-                if (Settings.CheckCycles && _root != null)
-                    if (!_root.CheckTree(_currentPath, _cacheNodeCount+1))
-                        Debugger.Break();
+                {
+#if DEBUG
+                    if (NodeLostEvent!=null)
+                        NodeLostEvent(this,new EventArgs());
+#endif
+                }
             }
             finally
             {
@@ -164,7 +235,7 @@ namespace Dataspace.Common.Utility.Dictionary
           
 
            
-            Interlocked.Increment(ref _cacheNodeCount);
+          
         }
 
         
@@ -180,11 +251,30 @@ namespace Dataspace.Common.Utility.Dictionary
             }
         }
 
-        private CacheNode<TKey, TValue>.Rebalancer CreateRebalancer()
+        private CacheNode<TKey, TValue>.Rebalancer CreateRebalancer(RebalancingMode mode)
         {
             var count = _cacheNodeCount;
-            var rebalancer = new CacheNode<TKey, TValue>.Rebalancer(_root, count, _currentPath,
+            CacheNode<TKey, TValue>.Rebalancer rebalancer;
+            var targetMode = mode;
+           
+            if (targetMode == RebalancingMode.Heavy)
+                rebalancer = new CacheNode<TKey, TValue>.HeavyRebalancer(_root, count, _currentPath,
                                                                     (_currentPath + 1) % CacheNode<TKey, TValue>.PathCount);
+            else if (targetMode == RebalancingMode.Light)
+            {
+                rebalancer = new CacheNode<TKey, TValue>.LightRebalancer(_root, count, _currentPath,
+                                                                    (_currentPath + 1) % CacheNode<TKey, TValue>.PathCount);
+            }
+            else if (targetMode == RebalancingMode.Hybrid)
+            {
+                rebalancer = new CacheNode<TKey, TValue>.HybridRebalancer(_root, count, _currentPath,
+                                                                    (_currentPath + 1) % CacheNode<TKey, TValue>.PathCount,TimeSpan.FromSeconds(10));
+            }
+            else
+            {
+                Debugger.Break();
+                throw new ArgumentException();
+            }
             return rebalancer;
         }
 
@@ -204,14 +294,18 @@ namespace Dataspace.Common.Utility.Dictionary
             {
                 Interlocked.Add(ref _totalAccessDepth, depth+1);
                 Interlocked.Increment(ref _getCount);
-                if (_getCount > CheckThreshold)
-                {
-                    var rate = (float) _totalAccessDepth/_getCount;
-                    if (Math.Abs(rate - _expectedGet) > RebalancingDelta)
-                        QueueRebalance();
-
-                    _totalAccessDepth >>= 4;
-                    _getCount >>= 4;
+                if (_getCount > _cacheController.Settings.CheckThreshold)
+                {                    
+                    _cacheController.MakeDecision();
+                    long gc = _getCount;
+                    long tad = _totalAccessDepth;
+                    while (_getCount > _cacheController.Settings.CheckThreshold
+                       && Interlocked.CompareExchange(ref _getCount,gc>>4,gc) != gc)
+                    {
+                        gc = _getCount;
+                      
+                    }
+                    Interlocked.CompareExchange(ref _totalAccessDepth, tad >> 4, tad);                                                                       
                 }
             }
             return node;
@@ -223,16 +317,24 @@ namespace Dataspace.Common.Utility.Dictionary
         }
 
        
-        public SecondLevelCache(IComparer<TKey> comparer,Func<TValue,float> frequencyCalc, Action<Action> rebalanceQueue = null)
+        public SecondLevelCache(IComparer<TKey> comparer,
+            Func<TValue,float> frequencyCalc,            
+            Action<Action> rebalanceQueue = null)
         {
-            _comparer = comparer;           
+            _comparer = comparer;
+            _state = new CacheState(this);
+            _cacheController = new CacheController<TKey, TValue>(this);
             _queueRebalance = rebalanceQueue?? (a=>a());
             _frequencyCalc = frequencyCalc;
-            _state = new CacheState(this);
-           
+         
+            _rebalancerStopper = new CancellationTokenSource();
+            _token = _rebalancerStopper.Token;
         }
 
 
-      
+        public void Dispose()
+        {
+          _rebalancerStopper.Cancel();
+        }
     }
 }

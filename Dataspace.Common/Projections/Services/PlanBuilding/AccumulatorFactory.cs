@@ -32,9 +32,9 @@ namespace Dataspace.Common.Projections.Services
                                                  k => k.Child,
                                                  k => k.Parameters);
 
-        private Action<FrameNode, IEnumerable<Guid>> CreatePusher(GroupStorage storage)
+        private Action<FrameNode, IEnumerable<Guid>,DateTime?> CreatePusher(GroupStorage storage)
         {
-            return (node, vals) => storage.AddOrUpdate(node, vals, (key, old) => vals);
+            return (node, vals,time) => storage.AddOrUpdate(node, vals, (key, old) => vals);
         }
 
         private Func<FrameNode, IEnumerable<Guid>> CreateGetter(GroupStorage storage)
@@ -86,7 +86,7 @@ namespace Dataspace.Common.Projections.Services
                                 key = k.Key,
                                 bounding = group.Key,
                                 value = k.Value
-                            }));
+                            })).ToArray();
 
                 var childNodes = nodes.ToDictionary(k => k,
                                                     k => producedNodes.Single(k2 => k2.bounding.SequenceEqual(names.Select(k4=>k.BoundingParameters[k4]))

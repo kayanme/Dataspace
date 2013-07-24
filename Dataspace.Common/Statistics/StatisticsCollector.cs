@@ -13,7 +13,7 @@ namespace Dataspace.Common.Statistics
 
     [Export]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    internal class StatisticsCollector
+    internal class StatisticsCollector:IDisposable
     {
 
         [Import] 
@@ -100,12 +100,15 @@ namespace Dataspace.Common.Statistics
 
         private ConcurrentQueue<Action> _additionActions = new ConcurrentQueue<Action>();
 
+        private volatile bool _isWorking;
+
         private void StartProcessing()
         {
+            _isWorking = true;
             Task.Factory.StartNew(
                 () =>
                     {
-                        while (true)
+                        while (_isWorking)
                         {
                             Thread.Sleep(TimeSpan.FromSeconds(1));
                             lock(_channels)
@@ -116,7 +119,7 @@ namespace Dataspace.Common.Statistics
                                 additionalAction();
                             }
                         }
-                    }, TaskCreationOptions.LongRunning);
+                    }, TaskCreationOptions.LongRunning|TaskCreationOptions.AttachedToParent);
         }
 
         private void ProcessMessages()
@@ -162,6 +165,10 @@ namespace Dataspace.Common.Statistics
             _statQueue.PutEvent(updates);
         }
 
-        
+
+        public void Dispose()
+        {
+            _isWorking = false;
+        }
     }
 }

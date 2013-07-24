@@ -14,7 +14,7 @@ namespace Dataspace.Common.Utility
 
         private readonly Func<TKey, TValue> _simpleGetter;
 
-        private readonly Action<TKey, TValue> _pushItem;
+        private readonly Action<TKey,TValue,DateTime?> _pushItem;
 
         private readonly SerialGetter _getter;
 
@@ -34,7 +34,7 @@ namespace Dataspace.Common.Utility
         /// <param name="getter">Получатель серии.</param>
         /// <param name="comparer">Сравниватель ключей.</param>
         /// <param name="pushItem"> Записыватель элемента с ключом в хранилище</param>
-        public Accumulator(Action<TKey, TValue> pushItem,
+        public Accumulator(Action<TKey, TValue,DateTime?> pushItem,
                            Predicate<TKey> presentsInSource,
                            Func<TKey, TValue> simpleGetter,
                            SerialGetter getter,
@@ -49,7 +49,7 @@ namespace Dataspace.Common.Utility
         }
 
 
-        private void LoadPack()
+        private void LoadPack(DateTime? retrieveTime)
         {
             var keys = new List<TKey>();
             try
@@ -80,7 +80,7 @@ namespace Dataspace.Common.Utility
             Debug.Assert(idsToGet.Count() == vals.Count());
 
             foreach (var t in idsToGet)
-                _pushItem(t, vals[t]);
+                _pushItem(t, vals[t],retrieveTime);
         }
 
         public Func<TValue> GetValue(TKey key)
@@ -97,9 +97,7 @@ namespace Dataspace.Common.Utility
             _queueGetLock.ExitReadLock();
             return () =>
                        {
-
-
-                           LoadPack();
+                           LoadPack(DateTime.Now);
                            return _simpleGetter(key);
 
                        };

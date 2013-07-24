@@ -40,8 +40,10 @@ namespace Dataspace.Common.ClassesForImplementation
         [Pure]
         internal object GetItem(Guid id)
         {
-            var item = GetItemInt(id);        
-            StatChannel.SendMessageAboutOneResource(id,Actions.ExternalGet);
+            var t = Stopwatch.StartNew();
+            var item = GetItemInt(id);  
+            t.Stop();
+            StatChannel.SendMessageAboutOneResource(id,Actions.ExternalGet,t.Elapsed);
             return item;
         }
 

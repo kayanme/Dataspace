@@ -454,14 +454,20 @@ namespace Common
 
         public void MarkForUpdate(UnactualResourceContent res)
         {
-            var type = _registrationStorage[res.ResourceName].ResourceType;
+            var resToken = _registrationStorage[res.ResourceName];
+            if (resToken == null)
+                throw new ArgumentException(string.Format("Resource {0} is unregistered",res.ResourceName));
+            var type = resToken.ResourceType;
             _stores[type].MarkAsUnactual(res.ResourceKey);
         }
 
         public void MarkForSecurityUpdate(SecurityUpdate res)
         {
             Contract.Requires(res != null);
-            var type = _registrationStorage[res.ResourceName].ResourceType;
+            var resToken = _registrationStorage[res.ResourceName];
+            if (resToken == null)
+                throw new ArgumentException(string.Format("Resource {0} is unregistered", res.ResourceName));
+            var type = resToken.ResourceType;
             if (res.UpdateAll)            
                 _securityManager.UpdateSecurity(type);            
             else  
