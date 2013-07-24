@@ -236,7 +236,6 @@
     <Compile Include="Utility\Dictionary\SecondLevelCache\HybridRebalancer.cs" />
     <Compile Include="Utility\Dictionary\SecondLevelCache\LightRebalancer.cs" />
     <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancer.cs" />
-    <Compile Include="Utility\Dictionary\SecondLevelCache\RebalancingCriteria.cs" />
     <Compile Include="Utility\Dictionary\SecondLevelCache\SecondLevelCache.cs" />
     <Compile Include="Utility\Dictionary\UpdatableElement.cs" />
     <Compile Include="Utility\Dictionary\UpgradedCache.cs" />
