@@ -29,7 +29,7 @@ namespace Dataspace.Common.Interfaces
         /// <param name="nmspace">Неймспейс</param>
         /// <returns>Ресурс.</returns>
         [Pure]
-        IEnumerable<Guid> Get<T>(UriQuery query, string nmspace = "") where T : class;
+        IEnumerable<Guid> Query<T>(UriQuery query, string nmspace = "") where T : class;
 
         /// <summary>
         /// Получение ключей ресурсов по запросу.
@@ -38,7 +38,7 @@ namespace Dataspace.Common.Interfaces
         /// <param name="query">Запрос.</param>
         /// <returns>Ресурс.</returns>
         [Pure]
-        IEnumerable<Guid> Get<T>(string query) where T : class;
+        IEnumerable<Guid> Query<T>(string query) where T : class;
 
         /// <summary>
         /// Позволяет делаеть отложенную загрузку ресурса. Отложенная загрузка позволяет накапливать серии данных,
@@ -75,7 +75,7 @@ namespace Dataspace.Common.Interfaces
         /// <returns>Функция для запроса, принимающая именованые аргументы вида (name:"")</returns>
         IEnumerable<Guid> Find<T>(object query,string namespc = "");
 
-        dynamic Query { get; } 
+        dynamic Spec { get; } 
     }
 
     [ContractClassFor(typeof(ITypedPool))]
@@ -86,14 +86,14 @@ namespace Dataspace.Common.Interfaces
              return default(T);
         }
 
-        public IEnumerable<Guid> Get<T>(UriQuery query, string nmspace) where T : class
+        public IEnumerable<Guid> Query<T>(UriQuery query, string nmspace) where T : class
         {
             Contract.Requires(query != null);
             Contract.Ensures(Contract.Result<IEnumerable<Guid>>() != null);
             return new Guid[0];
         }
 
-        public IEnumerable<Guid> Get<T>(string query) where T : class
+        public IEnumerable<Guid> Query<T>(string query) where T : class
         {
             Contract.Requires(query != null);
             Contract.Ensures(Contract.Result<IEnumerable<Guid>>() != null);
@@ -120,7 +120,7 @@ namespace Dataspace.Common.Interfaces
         }
 
 
-        public dynamic Query { get; private set; }
+        public dynamic Spec { get; private set; }
     }
 
    

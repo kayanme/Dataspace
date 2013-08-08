@@ -83,7 +83,7 @@ namespace Dataspace.Common.Projections.Classes.Descriptions
                             groupChildren.AddRange(localChildren);
                         }
                         var newParameters =
-                            new ParameterNames(node.BoundingParameters.Concat(new[] {MatchedElement.Name}));
+                            new ParameterNames(node.BoundingParameters.Concat(new[] { ProducedChildElement.Name }));
                         var group = new FrameNodeGroup(ProducedChildElement, groupChildren.ToArray(), newParameters);
                         return group;
                     };

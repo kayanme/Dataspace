@@ -19,7 +19,7 @@ namespace PerfTest.Commands
 
         public override void Do(IGenericPool service)
         {
-           Ids = service.Get(TargetName, _query);
+           Ids = service.Query(TargetName, _query);
         }
 
         public override bool Check(Store store)

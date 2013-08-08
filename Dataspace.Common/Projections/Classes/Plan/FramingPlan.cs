@@ -67,13 +67,14 @@ namespace Dataspace.Common.Projections.Classes
       
         public ProjectionFrame MakeFrame(Guid id, int maxDepth, Dictionary<string, object> parameters)
         {
-            var root = new FrameNode(id, _rootElement,1,parameters);
+       
             if (parameters.ContainsKey(_rootElement.Name))
                 parameters[_rootElement.Name] = id;
             else
             {
                 parameters.Add(_rootElement.Name,id);
             }
+            var root = new FrameNode(id, _rootElement, 1, parameters);
             IEnumerable<FrameNodeGroup> currentLevel = new[]
                                    {
                                        new FrameNodeGroup(_rootElement, 

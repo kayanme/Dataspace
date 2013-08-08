@@ -231,7 +231,7 @@ namespace Common
         /// <returns>
         /// Ключи ресурсов.
         /// </returns>
-        public IEnumerable<Guid> Get<T>(UriQuery query, string nmspace = "") where T : class
+        public IEnumerable<Guid> Query<T>(UriQuery query, string nmspace = "") where T : class
         {          
             CheckInitialization();
             return GetResourcesCommon(typeof (T),nmspace, query);
@@ -245,7 +245,7 @@ namespace Common
         /// <param name="query">Запрос.</param>
         /// <param name="nmspace">Область запросов.</param>
         /// <returns>Ключи ресурсов.</returns>
-        public IEnumerable<Guid> Get(string name, UriQuery query, string nmspace = "") 
+        public IEnumerable<Guid> Query(string name, UriQuery query, string nmspace = "") 
         {
             CheckInitialization();
             var type = _registrationStorage[name].ResourceType;
@@ -330,10 +330,10 @@ namespace Common
         /// <returns>
         /// Ресурс.
         /// </returns>
-        public IEnumerable<Guid> Get<T>(string query) where T : class
+        public IEnumerable<Guid> Query<T>(string query) where T : class
         {
             CheckInitialization();
-            return Get<T>(new UriQuery(query));
+            return Query<T>(new UriQuery(query));
         }
 
         private class DynamicQuery : DynamicObject
@@ -395,7 +395,7 @@ namespace Common
             return _storage.FindQuery(type, namespc, t.Names.ToArray())(t.Args.ToArray());          
         }
 
-        public dynamic Query { get { return new DynamicQuery(); } }
+        public dynamic Spec { get { return new DynamicQuery(); } }
 
         public IEnumerable<Guid> Find<T>(object query, string namespc = "")
         {            
@@ -422,6 +422,13 @@ namespace Common
         {
             CheckInitialization();
             return _registrationStorage.IsResourceRegistered(name);
+        }
+
+        public void Push<T>(Guid key, T resource)
+        {
+            CheckInitialization();
+            var store = _stores[typeof (T)];
+            store.PushInCache(key,resource);
         }
 
         public void MarkSubscriptionForResource(Type t)

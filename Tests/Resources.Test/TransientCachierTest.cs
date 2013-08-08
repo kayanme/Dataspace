@@ -116,17 +116,17 @@ namespace Resources.Test
             {
              
                 var expectedModel = _dependentModel.Key;
-                var actualModel = target.Get<Model>(new UriQuery{{"Element",_dependentElement.Name}}).First();
+                var actualModel = target.Query<Model>(new UriQuery{{"Element",_dependentElement.Name}}).First();
                 Assert.AreNotSame(expectedModel, actualModel);
                 Assert.AreEqual(expectedModel, actualModel);
               
 
-                var nolModels = target.Get<Model>(new UriQuery { { "Element", _singleElement.Name } });
+                var nolModels = target.Query<Model>(new UriQuery { { "Element", _singleElement.Name } });
                 Assert.IsTrue(!nolModels.Any());
 
                 try
                 {
-                    var res = target.Get<Model>(new UriQuery("default=true"));
+                    var res = target.Query<Model>(new UriQuery("default=true"));
                     Assert.IsTrue(res.Count() ==1);
                 }
                 catch (InvalidOperationException)
@@ -139,19 +139,19 @@ namespace Resources.Test
             if (typeof(T) == typeof(Element))
             {
                 var expectedElement = _dependentElement.Key;
-                var actualElement = target.Get<Element>(new UriQuery { { "modelName", _dependentModel.Name } }).First();
+                var actualElement = target.Query<Element>(new UriQuery { { "modelName", _dependentModel.Name } }).First();
                 Assert.AreNotSame(expectedElement, actualElement);
                 Assert.AreEqual(expectedElement, actualElement);
 
-                var actualElements = target.Get<Element>(
+                var actualElements = target.Query<Element>(
                     new UriQuery { { "ModelName", _dependentModel.Name } , {"ModelId",_singleModel.Key.ToString()} }).ToArray();
                 Assert.AreEqual(1,actualElements.Count());
                 Assert.AreEqual(expectedElement, actualElements[0]);
 
-                var nolElements = target.Get<Element>(new UriQuery { { "modelName", _singleModel.Name } });
+                var nolElements = target.Query<Element>(new UriQuery { { "modelName", _singleModel.Name } });
                 Assert.IsTrue(!nolElements.Any());
 
-                var emptyKey = target.Get<Element>(new UriQuery("badquery=true"));
+                var emptyKey = target.Query<Element>(new UriQuery("badquery=true"));
                 Assert.AreEqual(Guid.Empty,emptyKey.First());
             }
         }
@@ -164,18 +164,18 @@ namespace Resources.Test
             {
 
                 var expectedModel = _dependentModel.Key;
-                object q = target.Query(Element: _dependentElement.Name);
+                object q = target.Spec(Element: _dependentElement.Name);
                 var t = target.Find<Model>(q);
                 var actualModel = t.First();
                 Assert.AreNotSame(expectedModel, actualModel);
                 Assert.AreEqual(expectedModel, actualModel);
-                q = target.Query(Element: _singleElement.Name);
+                q = target.Spec(Element: _singleElement.Name);
                 var nolModels = target.Find<Model>(q);
                 Assert.IsTrue(!nolModels.Any());
 
                 try
                 {
-                    q = target.Query(Default: true);
+                    q = target.Spec(Default: true);
                     var res = target.Find<Model>(q);
                     Assert.IsTrue(res.Count() == 1);
                 }
@@ -188,19 +188,19 @@ namespace Resources.Test
             if (typeof(T) == typeof(Element))
             {
                 var expectedElement = _dependentElement.Key;
-                object query = target.Query(modelName: _dependentModel.Name);                
+                object query = target.Spec(modelName: _dependentModel.Name);                
                 var actualElement = target.Find<Element>(query).First();
                 Assert.AreNotSame(expectedElement, actualElement);
                 Assert.AreEqual(expectedElement, actualElement);
-                dynamic dquery = target.Query(ModelName: _dependentModel.Name);
+                dynamic dquery = target.Spec(ModelName: _dependentModel.Name);
                 dquery.ModelId = _singleModel.Key;
                 var actualElements = target.Find<Element>(query).ToArray();
                 Assert.AreEqual(1, actualElements.Count());
                 Assert.AreEqual(expectedElement, actualElements[0]);
-                query = target.Query(modelName: _singleModel.Name);
+                query = target.Spec(modelName: _singleModel.Name);
                 var nolElements = target.Find<Element>(query);
                 Assert.IsTrue(!nolElements.Any());
-                query = target.Query(badquery: true);
+                query = target.Spec(badquery: true);
                 var emptyKey = target.Find<Element>(query);
                 Assert.AreEqual(Guid.Empty, emptyKey.First());
             }

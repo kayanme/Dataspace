@@ -65,9 +65,9 @@ namespace Dataspace.Common.Utility
         /// Ресурсы
         /// </returns>
         [Pure]
-        public static IEnumerable<object> GetFilled(this IGenericPool cachier,string name, string query) 
+        public static IEnumerable<object> QueryFilled(this IGenericPool cachier,string name, string query) 
         {
-            return cachier.Get(name,cachier.Get(name,new UriQuery(query)));
+            return cachier.Get(name,cachier.Query(name,new UriQuery(query)));
         }
 
 
@@ -81,9 +81,9 @@ namespace Dataspace.Common.Utility
         /// Ресурсы
         /// </returns>
         [Pure]
-        public static IEnumerable<T> GetFilled<T>(this ITypedPool cachier, string query) where T : class
+        public static IEnumerable<T> QueryFilled<T>(this ITypedPool cachier, string query) where T : class
         {
-            return cachier.Get<T>(cachier.Get<T>(query));
+            return cachier.Get<T>(cachier.Query<T>(query));
         }
 		/// <summary>
 		/// Получение набора ресурсов по запросу.
@@ -95,9 +95,9 @@ namespace Dataspace.Common.Utility
 		/// Ресурсы
 		/// </returns>
 		[Pure]
-		public static IEnumerable<T> GetFilled<T>(this ITypedPool cachier, UriQuery query) where T : class
+		public static IEnumerable<T> QueryFilled<T>(this ITypedPool cachier, UriQuery query) where T : class
 		{
-			return cachier.Get<T>(cachier.Get<T>(query));
+			return cachier.Get<T>(cachier.Query<T>(query));
 		}
 
 
@@ -129,7 +129,7 @@ namespace Dataspace.Common.Utility
         [Pure]
         public static IEnumerable<Guid> Get<TResource, TLink>(this ITypedPool cachier, Guid id) where TResource : class
         {
-            var query = cachier.Query;
+            var query = cachier.Spec;
             query[(cachier as IGenericPool).GetNameByType(typeof (TLink))] = id;
             return cachier.Find<TResource>(query as object);
         }
@@ -163,7 +163,7 @@ namespace Dataspace.Common.Utility
         [Pure]
         public static T GetOneDependent<T>(this ITypedPool cachier,UriQuery query) where T : class
         {
-            return cachier.Get<T>(query).SingleOrDefault().ByDefault(cachier.Get<T>,null);
+            return cachier.Query<T>(query).SingleOrDefault().ByDefault(cachier.Get<T>,null);
         }
 
 

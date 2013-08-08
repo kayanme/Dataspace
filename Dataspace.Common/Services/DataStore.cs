@@ -190,6 +190,10 @@ namespace Dataspace.Common.Services
             _getter.StatChannel.Register(Name);
         }
 
+        internal void PushInCache(Guid key,object resource)
+        {
+            _dataCache.Push(key,resource);
+        }
        
         internal void MarkAsUnactual(Guid id)
         {

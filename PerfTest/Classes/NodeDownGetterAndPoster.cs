@@ -121,7 +121,7 @@ namespace PerfTest.Classes
                            var query = new UriQuery(args.Zip(pars, 
                                (a, b) => new KeyValuePair<string, string>(a, b.ToString())));
                            SpinWait.SpinUntil(() => false, _callDelay);
-                           return pool.Get(type, query, nmspc);
+                           return pool.Query(type, query, nmspc);
                        };
 
         }

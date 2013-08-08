@@ -29,7 +29,7 @@ namespace Resources.Test.TestResources
             try
             {
                 WasChanged = true;
-                var elements = TypedPool.Get<Element>("model=" + id);
+                var elements = TypedPool.Query<Element>("model=" + id);
                 return new ElementsInModel {Elements = elements};
             }
             catch (KeyNotFoundException)

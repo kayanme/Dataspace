@@ -69,15 +69,15 @@ namespace Dataspace.Common.Transactions
                 {
                     _resourceWriterQueueLock.EnterUpgradeableReadLock();
                     var existingResource = _resourcesToWrite.FirstOrDefault(k => k.Content.Equals(record.Content));
-                    try
+                    if (record.Resource != null)
                     {
-                        if (record.Resource != null)
-                        {
-                            _stream.Position = 0;
-                            _formatter.Serialize(_stream, record.Resource);
-                            _stream.Position = 0;
-                            record.Resource = _formatter.Deserialize(_stream);
-                        }
+                        _stream.Position = 0;
+                        _formatter.Serialize(_stream, record.Resource);
+                        _stream.Position = 0;
+                        record.Resource = _formatter.Deserialize(_stream);
+                    }
+                    try
+                    {                       
                         _resourceWriterQueueLock.EnterWriteLock();
                         if (existingResource != null) //если найден уже записанный в данной транзакции ресурс
                             existingResource.Resource = record.Resource;

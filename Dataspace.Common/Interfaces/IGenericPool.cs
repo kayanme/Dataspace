@@ -43,7 +43,7 @@ namespace Dataspace.Common.Interfaces
         /// <param name="nmspace">Пространство имен запроса </param>
         /// <returns></returns>
         [Pure]
-        IEnumerable<Guid> Get(string name, UriQuery query,string nmspace = "");
+        IEnumerable<Guid> Query(string name, UriQuery query,string nmspace = "");
 
         /// <summary>
         /// Отложенно получает ресурс по имени.
@@ -108,7 +108,7 @@ namespace Dataspace.Common.Interfaces
             return null;
         }
 
-        public IEnumerable<Guid> Get(string name, UriQuery query, string nmspace = "")
+        public IEnumerable<Guid> Query(string name, UriQuery query, string nmspace = "")
         {
             Contract.Requires(!string.IsNullOrEmpty(nmspace));
             Contract.Requires(!string.IsNullOrEmpty(name));

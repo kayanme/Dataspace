@@ -27,6 +27,7 @@ namespace Dataspace.Common.Projections.Classes
             Nodes = nodes;
             BoundingParameters = boundingParameters;
             Debug.Assert(nodes.All(k => k.MatchedElement == descriptor));
+            Debug.Assert(nodes.All(k => new ParameterNames(k.BoundingParameters.Select(k2=>k2.Key)) == BoundingParameters ));
         }
     }
 }

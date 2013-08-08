@@ -24,7 +24,7 @@ namespace Resources.Selector.Test
 
         private void CheckResource(params int[] count)
         {
-            var test = _container.GetExportedValue<ITypedPool>().Get<TestResource>("");
+            var test = _container.GetExportedValue<ITypedPool>().Query<TestResource>("");
             Assert.IsTrue(count.Contains(test.Count()));
         }
 
