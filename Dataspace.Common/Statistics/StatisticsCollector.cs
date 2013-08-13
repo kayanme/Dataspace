@@ -19,7 +19,7 @@ namespace Dataspace.Common.Statistics
         [Import] 
         private SettingsHolder _settings;
 
-        private Dictionary<string,List<ConcurrentQueue<StatChannel.Mesg>>> _channels 
+        private readonly Dictionary<string,List<ConcurrentQueue<StatChannel.Mesg>>> _channels 
             = new Dictionary<string, List<ConcurrentQueue<StatChannel.Mesg>>>();
 
         
@@ -124,9 +124,10 @@ namespace Dataspace.Common.Statistics
 
         private void ProcessMessages()
         {
-            var updates = new List<StatisticEvent>();
+            
             var name = _settings.Settings.InstanceName;
             const int maxUpdates =100;
+            var updates = new StatisticEvent[maxUpdates];
             foreach (var typeChannels in _channels)
                 foreach(var channel in typeChannels.Value)
                 {
@@ -136,28 +137,34 @@ namespace Dataspace.Common.Statistics
                         switch (msg.Action)
                         {
                             case Actions.Posted:
-                                updates.Add(new PostEvent(name,msg.id, typeChannels.Key, msg.Length, msg.Time));
+                                if (msg.ids == null)
+                                   updates[i] = new PostEvent(name,msg.id, typeChannels.Key, msg.Length, msg.Time);
+                                else
+                                    updates[i] = new SerialPostEvent(name, msg.Time, msg.Length);
                                 break;
                             case Actions.ExternalGet:
                                 if (msg.ids == null)
-                                    updates.Add(new ExternalGetEvent(name, msg.id, typeChannels.Key, msg.Length, msg.Time));
+                                     updates[i] = new ExternalGetEvent(name, msg.id, typeChannels.Key, msg.Length, msg.Time);
                                 else
-                                    updates.Add(new ExternalSerialGetEvent(name, msg.ids, typeChannels.Key, msg.Length, msg.Time));                                
+                                     updates[i] = new ExternalSerialGetEvent(name, msg.ids, typeChannels.Key, msg.Length, msg.Time);                               
                                 break;
                             case Actions.CacheGet:
-                                updates.Add(new CachedGetEvent(name, msg.id, typeChannels.Key, msg.Length, msg.Time));
+                                 updates[i] = new CachedGetEvent(name, msg.id, typeChannels.Key, msg.Length, msg.Time);
                                 break;
                             case Actions.BecameUnactual:
-                                updates.Add(new UnactualGetEvent(name, msg.id, typeChannels.Key, msg.Time));
+                                 updates[i] = new UnactualGetEvent(name, msg.id, typeChannels.Key, msg.Time);
                                 break;
                             case Actions.RebalanceStarted:
-                                updates.Add(new RebalanceEvent(name, msg.Time, typeChannels.Key, "Started"));
+                                 updates[i] = new RebalanceEvent(name, msg.Time, typeChannels.Key, "Started");
                                 break;
                             case Actions.RebalanceQueued:
-                                updates.Add(new RebalanceEvent(name, msg.Time, typeChannels.Key, "Queued"));
+                                 updates[i] = new RebalanceEvent(name, msg.Time, typeChannels.Key, "Queued");
                                 break;
                             case Actions.RebalanceEnded:
-                                updates.Add(new RebalanceEvent(name, msg.Time, typeChannels.Key, "Ended", msg.Length));
+                                updates[i] = new RebalanceEvent(name, msg.Time, typeChannels.Key, "Ended", msg.Length);
+                                break;
+                            case Actions.BranchChanged:
+                                updates[i] = new BranchChangedEvent(name, msg.Time, msg.Length,typeChannels.Key);
                                 break;
                         }
                     }

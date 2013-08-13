@@ -45,9 +45,11 @@ namespace Dataspace.Common.Statistics.Subscribers
             var posted = value.OfType<PostEvent>();
             var external = value.OfType<ExternalGetEvent>();
             var externalMany = value.OfType<ExternalSerialGetEvent>();
+            var postMany = value.OfType<SerialPostEvent>();
             var internl = value.OfType<CachedGetEvent>();
             var unact = value.OfType<UnactualGetEvent>();
             var rebalancing = value.OfType<RebalanceEvent>();
+            var branchChange = value.OfType<BranchChangedEvent>();
             string reportPart;
             Debug.Print("Отчет кэша " + Name + ":");
 
@@ -132,6 +134,15 @@ namespace Dataspace.Common.Statistics.Subscribers
                         );
                 Debug.Print(reportPart);
             }
+            if (postMany.Any())
+            {
+                Debug.Print("     сериями");
+                reportPart = string.Format("   --- {0} раз, всего {2}, в среднем {1}", 
+                     postMany.Count(),
+                     TimeSpan.FromTicks((long)postMany.Average(k2 => k2.Length.Ticks)),
+                     TimeSpan.FromTicks(postMany.Sum(k2 => k2.Length.Ticks)));                       
+                Debug.Print(reportPart);
+            }
             if (unact.Any())
             {
                 Debug.Print("   Стали неактуальны: ");
@@ -163,6 +174,25 @@ namespace Dataspace.Common.Statistics.Subscribers
                                         {
                                             name = k.Key,
                                             time = TimeSpan.FromTicks((long)k.Average(k2 => k2.Length.Ticks)),                                       
+                                        })
+                                    .Select(
+                                        k => string.Format("   --- {0} за среднее время {1}", k.name, k.time))
+                        );
+                Debug.Print(reportPart);
+            }
+
+            if (branchChange.Any())
+            {
+                Debug.Print("   Изменилась предельная глубина кэша: ");
+                reportPart =
+                    string.Join("\n",
+                                branchChange.GroupBy(k => k.ResourceType)
+                                    .Select(
+                                        k =>
+                                        new
+                                        {
+                                            name = k.Key,
+                                            time = TimeSpan.FromTicks((long)k.Average(k2 => k2.Length.Ticks)),
                                         })
                                     .Select(
                                         k => string.Format("   --- {0} за среднее время {1}", k.name, k.time))

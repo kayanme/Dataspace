@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Dataspace.Common.Data;
 using Dataspace.Common.Interfaces;
+using Dataspace.Common.Statistics;
 using Dataspace.Common.Transactions;
 
 namespace Dataspace.Common.Services
@@ -15,6 +17,8 @@ namespace Dataspace.Common.Services
     {
        
         private readonly IPacketResourcePoster _packetResourcePoster;
+
+        private readonly IStatChannel _statChannel;
 
         private void EmulatedSerialPost(IEnumerable<DataRecord> resources)
         {
@@ -28,16 +32,23 @@ namespace Dataspace.Common.Services
         {
             IEnumerable<DataRecord> notWrittenResources = resources;
             if (_packetResourcePoster != null)
+            {
+                var w = Stopwatch.StartNew();
                 notWrittenResources = _packetResourcePoster.PostResourceBlock(notWrittenResources);
+                w.Stop();
+                _statChannel.SendMessageAboutMultipleResources(new Guid[3],Actions.Posted, w.Elapsed);
+            }
             if (notWrittenResources!=null&& notWrittenResources.Any())
                 EmulatedSerialPost(notWrittenResources);
             
         }
 
         [ImportingConstructor]
-        public SerialPoster([Import(AllowDefault = true)]IPacketResourcePoster packetResourcePoster)
+        public SerialPoster([Import(AllowDefault = true)]IPacketResourcePoster packetResourcePoster,IStatChannel statChannel)
         {
             _packetResourcePoster = packetResourcePoster;
+            _statChannel = statChannel;
+            _statChannel.Register("Universal");
         }
     }
 }

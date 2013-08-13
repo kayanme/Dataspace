@@ -95,7 +95,7 @@ namespace TwoLevelCachePerfomance
 
         private static void Exp1()
         {
-            int tries = 3000;
+            int tries = 5000;
             var config = new ExperimentConfiguration
                              {
                                  PenaltyForExternalGet = 350,
@@ -127,12 +127,12 @@ namespace TwoLevelCachePerfomance
             Console.WindowWidth = 140;
             Console.BufferHeight = 4000;
             exp1.Run();
-            exp2.Run();
-            exp3.Run();
+            //exp2.Run();
+       //     exp3.Run();
        //     exp4.Run();
             exp1.Print();
-            exp2.Print();
-            exp3.Print();
+            //exp2.Print();
+       //     exp3.Print();
         //    exp4.Print();
             Console.ReadLine();
         }

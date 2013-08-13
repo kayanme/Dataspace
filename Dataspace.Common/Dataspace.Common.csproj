@@ -160,6 +160,8 @@
     <Compile Include="Projections\Services\Writers\XmlWriter.cs" />
     <Compile Include="ServiceResources\QueryInfo.cs" />
     <Compile Include="Services\SerialPoster.cs" />
+    <Compile Include="Statistics\Events\BranchChanged.cs" />
+    <Compile Include="Statistics\Events\SerialPostEvent.cs" />
     <Compile Include="Storages\ProjectionStorage.cs" />
     <Compile Include="Storages\RegistrationStorage.cs" />
     <Compile Include="Storages\SchemaBuilders\DataSchemaBuilder.cs" />
@@ -232,10 +234,13 @@
     <Compile Include="Utility\Dictionary\SecondLevelCache\CacheAdaptationSettings.cs" />
     <Compile Include="Utility\Dictionary\SecondLevelCache\CacheController.cs" />
     <Compile Include="Utility\Dictionary\SecondLevelCache\CacheNode.cs" />
-    <Compile Include="Utility\Dictionary\SecondLevelCache\HeavyRebalancer.cs" />
-    <Compile Include="Utility\Dictionary\SecondLevelCache\HybridRebalancer.cs" />
-    <Compile Include="Utility\Dictionary\SecondLevelCache\LightRebalancer.cs" />
-    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancer.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancing\HeavyRebalanceMethod.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancing\HeavyRebalancer.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancing\HybridRebalancer.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancing\LightRebalanceMethod.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancing\LightRebalancer.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancing\RebalanceMethod.cs" />
+    <Compile Include="Utility\Dictionary\SecondLevelCache\Rebalancing\Rebalancer.cs" />
     <Compile Include="Utility\Dictionary\SecondLevelCache\SecondLevelCache.cs" />
     <Compile Include="Utility\Dictionary\UpdatableElement.cs" />
     <Compile Include="Utility\Dictionary\UpgradedCache.cs" />

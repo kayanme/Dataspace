@@ -184,8 +184,15 @@ namespace Dataspace.Common.Utility.Dictionary
                 _writeLock.TryEnter(_writeTimeout, ref lockTaken);
                 if (BranchLengthChangedEvent !=null)
                     BranchLengthChangedEvent(this,new EventArgs());
-                if (_root!=null)
-                  _root.UpdateMaxBranchDepth(_currentPath, newBranchDepth);
+
+                if (_root != null)
+                {                    
+                    var w = Stopwatch.StartNew();
+                    _root.UpdateMaxBranchDepth(_currentPath, newBranchDepth);
+                    w.Stop();
+                    Channel.SendMessageAboutOneResource(Guid.Empty,Actions.BranchChanged,w.Elapsed);                 
+                }
+
             }
             finally
             {
