@@ -208,6 +208,7 @@
     <Compile Include="Statistics\Events\StatisticEvent.cs" />
     <Compile Include="Statistics\StatisticsCollector.cs" />
     <Compile Include="Statistics\Subscribers\DebugLogger.cs" />
+    <Compile Include="Transactions\DependentTransactionRepository.cs" />
     <Compile Include="Transactions\TransactedResourceManager.cs" />
     <Compile Include="Transactions\TransactionPacketStorage.cs" />
     <Compile Include="Transactions\TransactionStoragesStorage.cs" />

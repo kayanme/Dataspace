@@ -8,7 +8,7 @@ using System.Text;
 using Dataspace.Common.Data;
 using Dataspace.Common.Interfaces;
 using Dataspace.Common.Projections.Classes.Plan;
-using MultKeys = System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.Guid, System.Collections.Generic.IEnumerable<System.Guid>>>;
+
 namespace Dataspace.Common.ServiceResources
 {
     using KeyPair = KeyValuePair<Guid, IEnumerable<Guid>>;
@@ -96,7 +96,7 @@ namespace Dataspace.Common.ServiceResources
         public QueryForSingleParentResource GetSingleChildResourceQuery(string parentName, params string[] parameters)
         {
             var ar = FormInParameterNames(parentName, parameters);
-
+            
             Func<Guid, object[], object[]> argConv;
             if (!Arguments.Contains(parentName))
             {

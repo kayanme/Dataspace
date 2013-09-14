@@ -326,8 +326,12 @@ namespace Dataspace.Common.Services
 
         internal void PostResource(Guid id,object resource)
         {
-            var poster = resource != null ? new Action<Guid, object>(WriteResource)
-                                          : ((key,_) => DeleteResource(key));
+            var poster =  new Action<Guid, object>((key,o)=>
+                                                       {
+                                                          if (o != null)
+                                                              WriteResource(key, o);
+                                                            DeleteResource(key);
+                                                       });
 
             _services._resourceManager.AddResourceToSend(
                    new UnactualResourceContent { ResourceKey = id, ResourceName = Name },

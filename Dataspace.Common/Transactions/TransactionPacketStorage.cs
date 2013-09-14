@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -18,6 +20,7 @@ namespace Dataspace.Common.Transactions
     [Export]
     internal class TransactionPacketStorage : IPromotableSinglePhaseNotification,IEnlistmentNotification, IDisposable
     {
+        private readonly DependentTransactionRepository _dependentTransactionRepository;
 
         private readonly SerialPoster _poster;
 
@@ -35,7 +38,7 @@ namespace Dataspace.Common.Transactions
         private readonly BinaryFormatter _formatter = new BinaryFormatter();
 
         [ImportingConstructor]
-        public TransactionPacketStorage(SerialPoster poster)
+        public TransactionPacketStorage(SerialPoster poster,DependentTransactionRepository dependentTransactionRepository)
         {
           
             Contract.Requires(poster != null);                     
@@ -44,6 +47,14 @@ namespace Dataspace.Common.Transactions
                   || _holdingTransaction.IsolationLevel==IsolationLevel.ReadUncommitted
                   || _holdingTransaction.IsolationLevel == IsolationLevel.Chaos;
             _poster = poster;
+            _dependentTransactionRepository = dependentTransactionRepository;
+            _holdingTransaction.TransactionCompleted += _holdingTransaction_TransactionCompleted;
+        }
+
+        void _holdingTransaction_TransactionCompleted(object sender, TransactionEventArgs e)
+        {
+           if (e.Transaction.TransactionInformation.Status == TransactionStatus.Committed)
+               WriteResources();
         }
 
         public DataRecord GetResource(UnactualResourceContent resource)
@@ -57,6 +68,12 @@ namespace Dataspace.Common.Transactions
             {
                 _resourceWriterQueueLock.ExitReadLock();
             }
+        }
+
+        public IEnumerable<DataRecord> QueryResources(string type,Func<object,bool> query)
+        {
+            return _resourcesToWrite.Where(k => k.Content.ResourceName == type)                
+                                    .Where(k=>query(k.Resource));
         }
 
         public void AddResourceToPost(DataRecord record)
@@ -101,13 +118,23 @@ namespace Dataspace.Common.Transactions
         {
             if (_resourcesToWrite.Any())
             {
+                Debug.Assert(_holdingTransaction != null, "_holdingTransaction!=null");
                 Transaction oldTransaction = null;
-                bool transactionRequired = Transaction.Current !=null && _resourcesToWrite.Count > 1;
-                DependentTransaction depTrans = null;
-                if (transactionRequired)
+                bool newTransactionRequired = true;
+                CommittableTransaction depTrans = null;
+                if (newTransactionRequired)
                 {
+                  
                     oldTransaction = Transaction.Current;
-                    Transaction.Current = depTrans = oldTransaction.DependentClone(DependentCloneOption.RollbackIfNotComplete);                    
+                    Transaction.Current = depTrans = new CommittableTransaction();
+                    _dependentTransactionRepository.PlaceOurTransaction(depTrans);
+                }
+                else
+                {
+                    Debug.Assert(_holdingTransaction.TransactionInformation.Status == TransactionStatus.Active);
+                    oldTransaction = Transaction.Current;
+                    Transaction.Current = _holdingTransaction;
+                    _dependentTransactionRepository.PlaceOurTransaction(depTrans);
                 }
                 try
                 {
@@ -115,12 +142,12 @@ namespace Dataspace.Common.Transactions
                     _poster.PostPacket(resourceQueue);
                     _resourcesToWrite.Clear();
                     if (depTrans != null)
-                        depTrans.Complete();
+                        depTrans.Commit();
                 }
                 finally
                 {
-                    if (transactionRequired)
-                    {                    
+                    if (newTransactionRequired)
+                    {
                         Transaction.Current = oldTransaction;
                     }
                 }
@@ -176,12 +203,12 @@ namespace Dataspace.Common.Transactions
             try
             {
                 WriteResources();
-             preparingEnlistment.Prepared();
+                preparingEnlistment.Prepared();
             }
             catch (Exception ex)
             {
-            preparingEnlistment.ForceRollback(ex);
-             throw;
+                preparingEnlistment.ForceRollback(ex);
+                throw;
             }
         }
 

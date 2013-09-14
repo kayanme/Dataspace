@@ -48,7 +48,7 @@ namespace Dataspace.Common.ClassesForImplementation
         }
 
         [Pure]
-        protected abstract object GetItemInt(Guid id);
+         protected abstract object GetItemInt(Guid id);
 
 
         [Pure]

@@ -93,7 +93,12 @@ namespace Dataspace.Common.Services
                   k => k.GetType().BaseType != null && k.GetType().BaseType.GetGenericArguments().Length == 1));
 
             Func<ResourceGetter, Type> provType =
-                k => k.GetType().BaseType.GetGenericArguments().First();
+                k =>
+                    {
+                        var t = k.GetType().Construct(k2 => k2.BaseType != typeof (ResourceGetter), k2 => k2.BaseType);
+                       return t.Last().BaseType.GetGenericArguments().First();
+                        
+                    };
 
             Func<ResourcePoster, Type> wrType =
                k =>
