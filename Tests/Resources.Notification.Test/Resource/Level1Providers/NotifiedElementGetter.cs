@@ -11,8 +11,7 @@ namespace Resources.Notification.Test.Resource.Level1Providers
 {
 
     [Export(typeof(ResourceGetter))]
-    [Export]
-    internal class NotifiedElementGetter:ResourceGetter<NotifiedElement>
+    public class NotifiedElementGetter:ResourceGetter<NotifiedElement>
     {
 #pragma warning disable 0649
         [Import]

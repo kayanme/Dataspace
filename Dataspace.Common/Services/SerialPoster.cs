@@ -16,7 +16,7 @@ namespace Dataspace.Common.Services
     internal class SerialPoster
     {
        
-        private readonly IPacketResourcePoster _packetResourcePoster;
+          private readonly IEnumerable<IPacketResourcePoster> _packetResourcePosters;
 
         private readonly IStatChannel _statChannel;
 
@@ -30,23 +30,38 @@ namespace Dataspace.Common.Services
 
         public void PostPacket(IEnumerable<DataRecord> resources)
         {
-            IEnumerable<DataRecord> notWrittenResources = resources;
-            if (_packetResourcePoster != null)
-            {
-                var w = Stopwatch.StartNew();
-                notWrittenResources = _packetResourcePoster.PostResourceBlock(notWrittenResources);
-                w.Stop();
-                _statChannel.SendMessageAboutMultipleResources(new Guid[3],Actions.Posted, w.Elapsed);
-            }
-            if (notWrittenResources!=null&& notWrittenResources.Any())
+            Debug.Assert(resources != null,"resource!=null");
+            IEnumerable<DataRecord> notWrittenResources = 
+            _packetResourcePosters.
+                Aggregate(resources,
+                          (a, s) =>
+                              {
+                                  if (a.Any())
+                                  {
+                                      var w = Stopwatch.StartNew();
+                                      a = s.PostResourceBlock(a).ToArray();
+                                      w.Stop();
+                                      _statChannel.SendMessageAboutMultipleResources(new Guid[3], Actions.Posted,
+                                                                                     w.Elapsed);
+                                  }
+                                  return a;
+                              });
+        
+            if (notWrittenResources!=null && notWrittenResources.Any())
                 EmulatedSerialPost(notWrittenResources);
             
         }
 
         [ImportingConstructor]
-        public SerialPoster([Import(AllowDefault = true)]IPacketResourcePoster packetResourcePoster,IStatChannel statChannel)
+        public SerialPoster([ImportMany]IEnumerable<IPacketResourcePoster> packetResourcePosters,
+                                        IStatChannel statChannel,
+                                        SettingsHolder settings,
+                                        AppConfigProvider appConfigProvider
+            )
         {
-            _packetResourcePoster = packetResourcePoster;
+            _packetResourcePosters = packetResourcePosters
+                .Where(k => settings.Settings
+                                    .ActivationSwitchMatch(k.GetType(), appConfigProvider));
             _statChannel = statChannel;
             _statChannel.Register("Universal");
         }

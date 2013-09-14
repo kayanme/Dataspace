@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using Dataspace.Common.Attributes;
 using Dataspace.Common.Services;
+using System.Reflection;
 
 namespace Dataspace.Common.Data
 {
@@ -78,6 +79,14 @@ namespace Dataspace.Common.Data
                           (a,b)=> new KeyValuePair<string,string>(a.Name,b.Value)).ToArray();
 
             return FlagsMatch(enums) & AppConfigMatchMatch(keys,provider);
+        }
+
+        internal bool ActivationSwitchMatch(MemberInfo objectToCheck,AppConfigProvider provider)
+        {
+            var attrs =
+                objectToCheck.GetCustomAttributes(typeof (ActivationSwitchAttribute), true).Cast
+                    <ActivationSwitchAttribute>();
+            return ActivationSwitchMatch(attrs, provider);
         }
     }
 }
