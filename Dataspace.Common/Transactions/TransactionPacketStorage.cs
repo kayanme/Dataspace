@@ -48,13 +48,14 @@ namespace Dataspace.Common.Transactions
                   || _holdingTransaction.IsolationLevel == IsolationLevel.Chaos;
             _poster = poster;
             _dependentTransactionRepository = dependentTransactionRepository;
-            _holdingTransaction.TransactionCompleted += _holdingTransaction_TransactionCompleted;
+            _holdingTransaction.TransactionCompleted += HoldingTransactionTransactionCompleted;
         }
 
-        void _holdingTransaction_TransactionCompleted(object sender, TransactionEventArgs e)
+        void HoldingTransactionTransactionCompleted(object sender, TransactionEventArgs e)
         {
            if (e.Transaction.TransactionInformation.Status == TransactionStatus.Committed)
                WriteResources();
+           _holdingTransaction.TransactionCompleted -= HoldingTransactionTransactionCompleted;
         }
 
         public DataRecord GetResource(UnactualResourceContent resource)
@@ -72,7 +73,7 @@ namespace Dataspace.Common.Transactions
 
         public IEnumerable<DataRecord> QueryResources(string type,Func<object,bool> query)
         {
-            return _resourcesToWrite.Where(k => k.Content.ResourceName == type)                
+            return _resourcesToWrite.Where(k => k.Content.ResourceName == type && k.Resource != null)                
                                     .Where(k=>query(k.Resource));
         }
 
@@ -114,13 +115,13 @@ namespace Dataspace.Common.Transactions
             }
         }
 
-        private void WriteResources()
+        internal void WriteResources()
         {
             if (_resourcesToWrite.Any())
             {
                 Debug.Assert(_holdingTransaction != null, "_holdingTransaction!=null");
                 Transaction oldTransaction = null;
-                bool newTransactionRequired = true;
+                bool newTransactionRequired = Transaction.Current != _holdingTransaction;
                 CommittableTransaction depTrans = null;
                 if (newTransactionRequired)
                 {
@@ -132,9 +133,7 @@ namespace Dataspace.Common.Transactions
                 else
                 {
                     Debug.Assert(_holdingTransaction.TransactionInformation.Status == TransactionStatus.Active);
-                    oldTransaction = Transaction.Current;
-                    Transaction.Current = _holdingTransaction;
-                    _dependentTransactionRepository.PlaceOurTransaction(depTrans);
+                    _dependentTransactionRepository.PlaceOurTransaction(_holdingTransaction);
                 }
                 try
                 {

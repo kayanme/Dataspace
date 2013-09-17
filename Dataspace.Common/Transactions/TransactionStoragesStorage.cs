@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -13,8 +14,9 @@ namespace Dataspace.Common.Transactions
     internal sealed class TransactionStoragesStorage
     {
        
-        private readonly Dictionary<Transaction, TransactionPacketStorage> _transactionResources = new Dictionary<Transaction, TransactionPacketStorage>();
+        private static readonly Dictionary<Transaction, TransactionPacketStorage> _transactionResources = new Dictionary<Transaction, TransactionPacketStorage>();
 
+        
        
         private T GetStorage<T>(Func<T> creator, Dictionary<Transaction, T> localstorage) where T : IEnlistmentNotification
         {
@@ -26,9 +28,20 @@ namespace Dataspace.Common.Transactions
                 var storage = creator();
                 localstorage.Add(key,storage);
                 Transaction.Current.TransactionCompleted += KillStorage<T>;
-                Transaction.Current.EnlistVolatile(storage,EnlistmentOptions.EnlistDuringPrepareRequired);
-               
+                Transaction.Current.EnlistVolatile(storage,EnlistmentOptions.EnlistDuringPrepareRequired);                                              
                 return storage;
+            }
+        }
+
+        internal static void SendResource(Transaction transaction)
+        {
+            lock(_transactionResources)
+            {
+                if (_transactionResources.ContainsKey(transaction))
+                {
+                    var p = _transactionResources[transaction];
+                    p.WriteResources();
+                }
             }
         }
 
@@ -46,7 +59,7 @@ namespace Dataspace.Common.Transactions
                     var key = e.Transaction;
                     if (!_transactionResources.ContainsKey(key))
                         Debugger.Break();
-                    var t = _transactionResources[key];
+                    var t = _transactionResources[key];                    
                     t.Dispose();
                     _transactionResources.Remove(key);
                 }

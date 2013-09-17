@@ -239,6 +239,7 @@ namespace Dataspace.Common.Services
             {
                 Debugger.Break();
                 _registrationStorage.FlushRegistraions();
+                _stores.Clear();
                //любая ошибка должна чистить регистрации                           
                 throw;
             }

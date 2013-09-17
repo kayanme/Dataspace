@@ -209,7 +209,9 @@
     <Compile Include="Statistics\StatisticsCollector.cs" />
     <Compile Include="Statistics\Subscribers\DebugLogger.cs" />
     <Compile Include="Transactions\DependentTransactionRepository.cs" />
+    <Compile Include="Transactions\ResourceTransactionScope.cs" />
     <Compile Include="Transactions\TransactedResourceManager.cs" />
+    <Compile Include="Transactions\TransactionExtensions.cs" />
     <Compile Include="Transactions\TransactionPacketStorage.cs" />
     <Compile Include="Transactions\TransactionStoragesStorage.cs" />
     <Compile Include="Utility\Accumulator.cs" />
