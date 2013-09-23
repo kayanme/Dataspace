@@ -20,7 +20,7 @@ namespace Indusoft.Testhelper.Defaults
         [Import]
         private IGenericPool _cachier;
 
-        public override IEnumerable<T> GetItems<T>(System.Linq.Expressions.Expression<Func<T, bool>> predicate)
+        protected override IEnumerable<T> QueryItems<T>(System.Linq.Expressions.Expression<Func<T, bool>> predicate)
         {
             var name = _cachier.GetNameByType(typeof (T));
             Thread.Sleep(Store.GetDelay);

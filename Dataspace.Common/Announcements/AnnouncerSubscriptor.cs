@@ -35,7 +35,9 @@ namespace Dataspace.Common.Announcements
 
         private readonly Dictionary<string, List<Guid>> _subscriptions = new Dictionary<string, List<Guid>>();
 
-        private SubscriptionToken SubscribeForResourceChangeCommon(Type t, SubscriptionToken tokenToAppend)
+        private readonly List<string> _totalSubscriptions = new List<string>();
+
+        private SubscriptionToken SubscribeForResourceChangeCommon(Type t, SubscriptionToken tokenToAppend,bool forPropagation)
         {
             _cachier.MarkSubscriptionForResource(t);
             SubscriptionToken token;
@@ -45,11 +47,19 @@ namespace Dataspace.Common.Announcements
                 if (_issuedTokens.ContainsKey(name))
                 {
                     token = _issuedTokens[name];
-                    token.SubscriptionCounter++;
+                    if (!forPropagation)
+                       token.SubscriptionCounter++;
+                    else
+                        token.PropagationSubscriptionCounter++;
                 }
                 else
                 {
-                    token = new SubscriptionToken(this) { ResourceType = t, ResourceName = name, SubscriptionCounter = 1 };
+                    token = new SubscriptionToken(this) 
+                    { ResourceType = t, ResourceName = name };
+                    if (!forPropagation)
+                        token.SubscriptionCounter =1;
+                    else
+                        token.PropagationSubscriptionCounter =1 ;
                     _issuedTokens.Add(name, token);
                 }
 
@@ -68,16 +78,35 @@ namespace Dataspace.Common.Announcements
                         token = combinedToken;
                     }
                 }
+                if (forPropagation)
+                    _totalSubscriptions.Add(name);
             }
             return token;
+        }
+
+        private void UnmarkSimpleTokenForPropagation(SubscriptionToken token)
+        {           
+            token.PropagationSubscriptionCounter--;
+            if (token.PropagationSubscriptionCounter == 0)
+            {
+                _totalSubscriptions.Remove(token.ResourceName);
+                if (token.SubscriptionCounter == 0)
+                {
+                    _issuedTokens.Remove(token.ResourceName);
+                    _cachier.UnmarkSubscriptionForResource(token.ResourceType);
+                }
+            }
         }
 
         private void UnmarkSimpleToken(SubscriptionToken token)
         {
             _cachier.UnmarkSubscriptionForResource(token.ResourceType);
             token.SubscriptionCounter--;
-            if (token.SubscriptionCounter == 0)
+            if (token.SubscriptionCounter == 0 && token.PropagationSubscriptionCounter == 0)
+            {
                 _issuedTokens.Remove(token.ResourceName);
+                _cachier.UnmarkSubscriptionForResource(token.ResourceType);
+            }
         }
 
         public void AddResourceName(string name)
@@ -104,7 +133,19 @@ namespace Dataspace.Common.Announcements
         /// </returns>
         public SubscriptionToken SubscribeForResourceChange<T>()
         {          
-            return SubscribeForResourceChangeCommon(typeof(T),null);
+            return SubscribeForResourceChangeCommon(typeof(T),null,false);
+        }
+
+        /// <summary>
+        /// Подписка на обновление ресурса заданного типа.
+        /// </summary>
+        /// <typeparam name="T">Тип ресурса</typeparam>
+        /// <returns>
+        /// Маркер подписки
+        /// </returns>
+        public SubscriptionToken SubscribeForResourceChangePropagation<T>()
+        {
+            return SubscribeForResourceChangeCommon(typeof(T), null, true);
         }
 
         /// <summary>
@@ -114,19 +155,37 @@ namespace Dataspace.Common.Announcements
         /// <param name="token">The token.</param>
         /// <returns></returns>
         internal SubscriptionToken MergeWithSubscriptionForResourceChange<T>(SubscriptionToken token)
-        {
-            return SubscribeForResourceChangeCommon(typeof(T),token);
+        {            
+            return SubscribeForResourceChangeCommon(typeof(T),token,false);
         }
 
 
 
 
-        public void SubscribeForResourceChange(string resourceName, Guid id)
+        public void SubscribeForResourceChangePropagation(string resourceName, Guid id)
         {           
             _subscriptions[resourceName].Add(id);
         }
 
-       
+        public void UnsubscribeForResourceChangePropagation(SubscriptionToken token)
+        {
+            lock (_issuedTokens)
+            {
+                if (token is CombinedSubscriptionToken)
+                {
+                    var stoken = (token as CombinedSubscriptionToken);
+                    foreach (var subscriptionToken in stoken.Tokens.Where(k=>k.PropagationSubscriptionCounter>0))
+                    {
+                        UnmarkSimpleTokenForPropagation(subscriptionToken);
+                    }
+                    stoken.ClearTokens();
+                }
+                else
+                {
+                    UnmarkSimpleTokenForPropagation(token);
+                }
+            }
+        }
 
      
         /// <summary>
@@ -139,7 +198,7 @@ namespace Dataspace.Common.Announcements
         /// Автоматически применяется при апдейте ресурса.
         /// <see cref="AnnouncerUplink" />Очередь событий
         /// </remarks>
-        public void UnsubscribeForResourceChange(string resourceName, Guid id)
+        public void UnsubscribeForResourceChangePropagation(string resourceName, Guid id)
         {
             _subscriptions[resourceName].Remove(id);
         }
@@ -155,7 +214,7 @@ namespace Dataspace.Common.Announcements
                 if (token is CombinedSubscriptionToken)
                 {
                     var stoken = (token as CombinedSubscriptionToken);
-                    foreach (var subscriptionToken in stoken.Tokens)
+                    foreach (var subscriptionToken in stoken.Tokens.Where(k => k.SubscriptionCounter > 0))
                     {
                         UnmarkSimpleToken(subscriptionToken);
                     }
@@ -176,7 +235,7 @@ namespace Dataspace.Common.Announcements
         public void AnnonunceUnactuality(string resourceName, Guid id)
         {
             var res = new UnactualResourceContent { ResourceKey = id, ResourceName = resourceName };
-            if (_subscriptions[resourceName].Contains(id))            
+            if (_totalSubscriptions.Contains(resourceName) || _subscriptions[resourceName].Contains(id))            
                 foreach (var uplink in _uplinks)
                 {
                     uplink.OnNext(res);

@@ -17,17 +17,17 @@ namespace Dataspace.Common.Interfaces
         /// <param name="resourceName">Название ресурса.</param>
         /// <param name="id">Ключ ресурса.</param>
         /// <remarks> Применяется для разрешения публикации события об изменении конкретного ресурса в связи "вверх-вниз".<see cref="AnnouncerUplink"/>Очередь событий</remarks>
-        void SubscribeForResourceChange(string resourceName, Guid id);
+        void SubscribeForResourceChangePropagation(string resourceName, Guid id);
 
         /// <summary>
-        /// Отписка от обновления ресурса.
+        /// Отписка от рассылки обновления ресурса.
         /// </summary>
         /// <param name="resourceName">Название ресурса.</param>
         /// <param name="id">Ключ ресурса.</param>
         /// <remarks> Применяется для запрета публикации события об изменении конкретного ресурса в связи "вверх-вниз".
         /// Автоматически применяется при апдейте ресурса.
         /// <see cref="AnnouncerUplink"/>Очередь событий</remarks>
-        void UnsubscribeForResourceChange(string resourceName, Guid id);
+        void UnsubscribeForResourceChangePropagation(string resourceName, Guid id);
 
         /// <summary>
         /// Подписка на обновление ресурса заданного типа.
@@ -42,6 +42,19 @@ namespace Dataspace.Common.Interfaces
         /// <param name="token">Маркер обновления.</param>
         void UnsubscribeForResourceChange(SubscriptionToken token);
 
+        /// <summary>
+        /// Подписка на рассылку обновлений ресурса.
+        /// </summary>
+        /// <typeparam name="T">Тип ресурса</typeparam>
+        /// <remarks> Применяется для разрешения публикации события об изменении конкретного ресурса в связи "вверх-вниз".<see cref="AnnouncerUplink"/>Очередь событий</remarks>
+        SubscriptionToken SubscribeForResourceChangePropagation<T>();
+
+        /// <summary>
+        /// Отписывается от рассылки обновления ресурса.
+        /// </summary>
+        /// <param name="token">Маркер обновления.</param>
+        void UnsubscribeForResourceChangePropagation(SubscriptionToken token);
+
     }
 
     [ContractClassFor(typeof(IAnnouncerSubscriptor))]
@@ -49,13 +62,13 @@ namespace Dataspace.Common.Interfaces
     {
 
         
-
-        public void SubscribeForResourceChange(string resourceName, Guid id)
+    
+        public void SubscribeForResourceChangePropagation(string resourceName, Guid id)
         {
-            Contract.Requires(!string.IsNullOrEmpty(resourceName));
+            throw new NotImplementedException();
         }
 
-        public void UnsubscribeForResourceChange(string resourceName, Guid id)
+        public void UnsubscribeForResourceChangePropagation(string resourceName, Guid id)
         {
             Contract.Requires(!string.IsNullOrEmpty(resourceName));
         }
@@ -69,6 +82,16 @@ namespace Dataspace.Common.Interfaces
         public void UnsubscribeForResourceChange(SubscriptionToken token)
         {
             Contract.Requires(token != null);
+        }
+
+        public SubscriptionToken SubscribeForResourceChangePropagation<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UnsubscribeForResourceChangePropagation(SubscriptionToken token)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -489,7 +489,7 @@ namespace Common
             if (value is UnactualResourceContent)
             {
                 MarkForUpdate(value as UnactualResourceContent);
-                _subscriptor.UnsubscribeForResourceChange(value.ResourceName, value.ResourceKey);
+                _subscriptor.UnsubscribeForResourceChangePropagation(value.ResourceName, value.ResourceKey);
             }
             else
             {

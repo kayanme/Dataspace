@@ -13,10 +13,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Resources.Test.Caching
 {
-    /// <summary>
-    /// Для всех тестов, считающих расхождение между ожидаемым временем получения и реальным проверяется достаточно большая вилка в связи
-    ///  с высокодисперсным нормальным распределением (а надо пуассоновское).
-    /// </summary>
+   
     [TestClass]
     public class SecondLevelCacheTest2
     {
@@ -33,12 +30,13 @@ namespace Resources.Test.Caching
 
         private SecondLevelCache<Guid, TestElement> CreateCache()
         {
-            var cache = new SecondLevelCache<Guid, TestElement>(Comparer<Guid>.Default,  k => k.Frequency,
-                a =>
-                                                                                                                  {
-                                                                                                                      a();
-                                                                                                                      _wasRebalancing  = true;                                                                                                                     
-                                                                                                                  });
+            var cache = new SecondLevelCache<Guid, TestElement>(Comparer<Guid>.Default,
+                                                                k => k.Frequency,
+                                                                a =>
+                                                                    {
+                                                                        a();
+                                                                        _wasRebalancing = true;
+                                                                    });
             return cache;
         }
 
@@ -70,15 +68,7 @@ namespace Resources.Test.Caching
             Assert.AreEqual(element.Value, foundElement.Value);
             Assert.IsFalse(_wasRebalancing);//не будет ребалансировки, потому что ожидаемый путь (1 изначально) совпадает с фактическим
         }
-
-       
-
-       
-
-
-   
-
-
+                 
         [TestMethod]
         [TestCategory("Caching")]
         public void MultipleCacheTestWithRebalancingAndCheck()

@@ -45,7 +45,8 @@ namespace Dataspace.Common.Utility.Dictionary.SecondLevelCache
             }
             ~GCNotificator()
             {
-                if (GC.GetGeneration(this) < 2)
+
+                if (GC.GetGeneration(this) < 2 && !Environment.HasShutdownStarted)
                 {
                     _tempMe = this;
                     GC.ReRegisterForFinalize(this);

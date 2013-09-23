@@ -16,6 +16,8 @@ namespace Dataspace.Common.Announcements
 
         internal int SubscriptionCounter;
 
+        internal int PropagationSubscriptionCounter;
+
         /// <summary>
         /// Возникает после потери ресурсом актуальности.
         /// </summary>

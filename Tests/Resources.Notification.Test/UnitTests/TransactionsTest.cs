@@ -13,10 +13,12 @@ using Dataspace.Common.ClassesForImplementation;
 using Dataspace.Common.Data;
 using Dataspace.Common.Interfaces;
 using Dataspace.Common.Statistics;
+using Dataspace.Common.Transactions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Resources.Notification.Test.Resource.Level1Providers;
 using Resources.Test.TestResources;
 using Rhino.Mocks;
+using Rhino.Mocks.Constraints;
 
 namespace Resources.Notification.Test.UnitTests
 {
@@ -201,6 +203,103 @@ namespace Resources.Notification.Test.UnitTests
                     .Repeat.Once());      
         }
 
+
+        [TestMethod]
+        [TestCategory("Transaction")]
+        public void LocalizedWritingGettingWithInnerScope()
+        {
+            var id = Guid.NewGuid();
+            var el = new NotifiedElement { Name = "Test" };
+            _posterFactory.Stub(k => k.PostResourceBlock(null))
+               .IgnoreArguments()
+               .Return(new DataRecord[0]);
+            _mockRepository.ReplayAll();
+            var el2 = _pool.Get<NotifiedElement>(id);
+            Assert.IsNull(el2);
+            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                _pool.Post(id, el);
+                using (var scope2 = new TransactionScope(TransactionScopeOption.Required))
+                {
+                    el2 = _pool.Get<NotifiedElement>(id);
+                    _getter.AssertWasNotCalled(k => k.GetItemTypedProxy(id),
+                                               k => k.IgnoreArguments());
+                    scope2.Complete();
+                }
+                Assert.IsNotNull(el2);
+                Assert.AreEqual(el.Name, el2.Name);
+                scope.Complete();
+            }
+
+            _posterFactory.AssertWasCalled(k => k.PostResourceBlock(null), k => k.IgnoreArguments()
+                    .Repeat.Once());
+        }
+
+        [TestCategory("Transaction")]
+        public void LocalizedWritingGettingWithInnerScope2()
+        {
+            var id = Guid.NewGuid();
+            var el = new NotifiedElement { Name = "Test" };
+            _posterFactory.Stub(k => k.PostResourceBlock(null))
+               .IgnoreArguments()
+               .Return(new DataRecord[0]);
+            _mockRepository.ReplayAll();
+            var el2 = _pool.Get<NotifiedElement>(id);
+            Assert.IsNull(el2);
+            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+            {
+               
+                using (var scope2 = new TransactionScope(TransactionScopeOption.Required))
+                {
+                    _pool.Post(id, el);                  
+                    scope2.Complete();
+                }
+                el2 = _pool.Get<NotifiedElement>(id);
+                _getter.AssertWasNotCalled(k => k.GetItemTypedProxy(id),
+                                           k => k.IgnoreArguments());
+                Assert.IsNotNull(el2);
+                Assert.AreEqual(el.Name, el2.Name);
+                scope.Complete();
+            }
+
+            _posterFactory.AssertWasCalled(k => k.PostResourceBlock(null), k => k.IgnoreArguments()
+                    .Repeat.Once());
+        }
+
+        [TestMethod]
+        [TestCategory("Transaction")]
+        public void LocalizedWritingWithInnerScope()
+        {
+            var id = Guid.NewGuid();
+            var el = new NotifiedElement { Name = "Test" };
+            var id2 = Guid.NewGuid();
+            var el2 = new NotifiedElement { Name = "Test2" };
+            IEnumerable<DataRecord> records = null;
+            _posterFactory.Stub(k => k.PostResourceBlock(null))
+                .IgnoreArguments()
+                .Do(new Func<IEnumerable<DataRecord>, IEnumerable<DataRecord>>(k =>
+                                                                                   {
+                                                                                       records = k;
+                                                                                       return k;
+                                                                                   }));
+            _mockRepository.ReplayAll();
+            
+            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                _pool.Post(id, el);
+                using (var scope2 = new TransactionScope(TransactionScopeOption.Required))
+                {
+                    _pool.Post(id2, el2);                   
+                    _posterFactory.AssertWasNotCalled(k => k.PostResourceBlock(null), k => k.IgnoreArguments()
+                                  .Repeat.Once());
+                    scope2.Complete();
+                }             
+                scope.Complete();                
+            }
+            CollectionAssert.AreEquivalent(records.Select(k => k.Content.ResourceKey).ToList(), new[]{id, id2}.ToList());
+
+        }
+
         [TestMethod]
         [TestCategory("Transaction")]
         public void LocalizedWritingQuering()
@@ -221,6 +320,126 @@ namespace Resources.Notification.Test.UnitTests
               
                 Assert.IsTrue(el2.Any());
                 Assert.AreEqual(el.Key, el2.First());
+                scope.Complete();
+            }
+
+            _posterFactory.AssertWasCalled(k => k.PostResourceBlock(null), k => k.IgnoreArguments()
+                    .Repeat.Once());
+        }
+
+        [TestMethod]
+        [TestCategory("Transaction")]
+        public void LocalizedWritingQueringWithInnerScope()
+        {
+            var id = Guid.NewGuid();
+            var el = new NotifiedElement { Key = id, Name = "Test" };
+            _posterFactory.Stub(k => k.PostResourceBlock(null))
+               .IgnoreArguments()
+               .Return(new DataRecord[0]);
+            _mockRepository.ReplayAll();
+            object query = _pool.Spec(name: "Test");
+            var el2 = _pool.Find<NotifiedElement>(query);
+            Assert.IsFalse(el2.Any());
+            using (var scope = new ResourceTransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                _pool.Post(id, el);
+                using (var scope2 = new ResourceTransactionScope(TransactionScopeOption.Required))
+                {
+                    el2 = _pool.Find<NotifiedElement>(query);
+                    scope2.Complete();
+                }
+                Assert.IsTrue(el2.Any());
+                Assert.AreEqual(el.Key, el2.First());
+                scope.Complete();
+            }
+
+            _posterFactory.AssertWasCalled(k => k.PostResourceBlock(null), k => k.IgnoreArguments()
+                    .Repeat.Once());
+        }
+
+        [TestMethod]
+        [TestCategory("Transaction")]
+        public void LocalizedWritingQueringWithInnerScope2()
+        {
+            var id = Guid.NewGuid();
+            var el = new NotifiedElement { Key = id, Name = "Test" };
+            _posterFactory.Stub(k => k.PostResourceBlock(null))
+               .IgnoreArguments()
+               .Return(new DataRecord[0]);
+            _mockRepository.ReplayAll();
+            object query = _pool.Spec(name: "Test");
+            var el2 = _pool.Find<NotifiedElement>(query);
+            Assert.IsFalse(el2.Any());
+            using (var scope = new ResourceTransactionScope(TransactionScopeOption.RequiresNew))
+            {
+
+                using (var scope2 = new ResourceTransactionScope(TransactionScopeOption.Required))
+                {
+                    _pool.Post(id, el);                
+                    scope2.Complete();
+                }
+                el2 = _pool.Find<NotifiedElement>(query);
+                Assert.IsTrue(el2.Any());
+                Assert.AreEqual(el.Key, el2.First());
+                scope.Complete();
+            }
+
+            _posterFactory.AssertWasCalled(k => k.PostResourceBlock(null), k => k.IgnoreArguments()
+                    .Repeat.Once());
+        }
+
+        [TestMethod]
+        [TestCategory("Transaction")]
+        public void LocalizedWritingQueringWithInnerScope3()
+        {
+            var id = Guid.NewGuid();
+            var el = new NotifiedElement { Key = id, Name = "Test" };
+            _posterFactory.Stub(k => k.PostResourceBlock(null))
+               .IgnoreArguments()
+               .Return(new DataRecord[0]);
+            _mockRepository.ReplayAll();
+            object query = _pool.Spec(name: "Test");
+            var el2 = _pool.Find<NotifiedElement>(query);
+            Assert.IsFalse(el2.Any());
+            using (var scope = new ResourceTransactionScope(TransactionScopeOption.RequiresNew))
+            {
+
+                using (var scope2 = new ResourceTransactionScope(TransactionScopeOption.Suppress))
+                {
+                    _pool.Post(id, el);
+                    scope2.Complete();
+                }
+                el2 = _pool.Find<NotifiedElement>(query);
+                Assert.IsFalse(el2.Any());          
+                scope.Complete();
+            }
+
+            _posterFactory.AssertWasNotCalled(k => k.PostResourceBlock(null), k => k.IgnoreArguments()
+                    .Repeat.Once());
+        }
+
+        [TestMethod]
+        [TestCategory("Transaction")]
+        public void LocalizedWritingQueringWithInnerScope4()
+        {
+            var id = Guid.NewGuid();
+            var el = new NotifiedElement { Key = id, Name = "Test" };
+            _posterFactory.Stub(k => k.PostResourceBlock(null))
+               .IgnoreArguments()
+               .Return(new DataRecord[0]);
+            _mockRepository.ReplayAll();
+            object query = _pool.Spec(name: "Test");
+            var el2 = _pool.Find<NotifiedElement>(query);
+            Assert.IsFalse(el2.Any());
+            using (var scope = new ResourceTransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                _pool.Post(id, el);
+                using (var scope2 = new ResourceTransactionScope(TransactionScopeOption.Suppress))
+                {
+                    el2 = _pool.Find<NotifiedElement>(query);
+                    scope2.Complete();
+                }
+                Assert.IsFalse(el2.Any());              
                 scope.Complete();
             }
 
