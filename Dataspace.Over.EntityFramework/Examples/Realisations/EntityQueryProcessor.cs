@@ -12,7 +12,7 @@ namespace Dataspace.Over.EntityFramework.Realisations
 {
     public sealed class EntityQueryProcessor:QueryProcessor
     {
-        public override IEnumerable<T> GetItems<T>(Expression<Func<T, bool>> predicate)
+        protected override IEnumerable<T> QueryItems<T>(Expression<Func<T, bool>> predicate)
         {
             using(var model = new ResourcesModelContainer())
             {

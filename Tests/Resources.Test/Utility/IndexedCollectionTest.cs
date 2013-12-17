@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Dataspace.Common.Utility;
 using Dataspace.Common.Utility.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Resources.Test
+namespace A.Resources.Test.Utility
 {
     [TestClass]
     public class IndexedCollectionTest

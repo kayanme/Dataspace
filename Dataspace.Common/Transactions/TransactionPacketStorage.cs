@@ -89,10 +89,18 @@ namespace Dataspace.Common.Transactions
                     var existingResource = _resourcesToWrite.FirstOrDefault(k => k.Content.Equals(record.Content));
                     if (record.Resource != null)
                     {
-                        _stream.Position = 0;
-                        _formatter.Serialize(_stream, record.Resource);
-                        _stream.Position = 0;
-                        record.Resource = _formatter.Deserialize(_stream);
+                        if (record.Resource is ICloneable)
+			{
+                             record.Resource =  (record.Resource as ICloneable).Clone();
+			}	
+                        else if (record.Resource.GetType().IsSerializable)
+			{
+                          _stream.Position = 0;
+                          _formatter.Serialize(_stream, record.Resource);
+                           _stream.Position = 0;
+                           record.Resource = _formatter.Deserialize(_stream);
+			}
+			
                     }
                     try
                     {                       

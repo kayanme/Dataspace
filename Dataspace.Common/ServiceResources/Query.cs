@@ -65,21 +65,101 @@ namespace Dataspace.Common.ServiceResources
             return targetType == typeof(IEnumerable<Guid>);
         }
 
-        public FormedQuery GetQueryMethod(params string[] parametersInOrder)
+        public bool TypesAreCompletlyMatch(string[] parametersInOrder, Type[] parameterTypesInOrder)
+        {
+            var order = CreateReorderSeq(parametersInOrder);
+            var givenTypes = Reorder(parameterTypesInOrder, order).Cast<Type>().ToArray();
+            return _types.Zip(givenTypes, (s, t) => s == t || s == typeof(string)).All(k => k);
+        }
+
+        public bool CanMakeAQueryForArgumentTypes(string[] parametersInOrder, Type[] parameterTypesInOrder)
         {
             var reordering = CreateReorderSeq(parametersInOrder);
+
+            var givenTypes = Reorder(parameterTypesInOrder, reordering).Cast<Type>().ToArray();
+            for (int i = 0; i < parametersInOrder.Length; i++)
+            {
+                if (!_types[i].IsAssignableFrom(givenTypes[i]) && !IsTypeIsAnEnumerableOverOther(_types[i], givenTypes[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool IsTypeIsAnEnumerableOverOther(Type probablyEnumerable,Type single)
+        {
+            return probablyEnumerable.IsGenericType
+                   && probablyEnumerable.GetGenericTypeDefinition() == typeof (IEnumerable<>)
+                   && probablyEnumerable.GetGenericArguments()[0] == single;
+        }
+
+        public FormedQuery GetQueryMethod(string[] parametersInOrder,Type[] parameterTypesInOrder = null)
+        {
+            var reordering = CreateReorderSeq(parametersInOrder);
+            Func<object, object>[] conversingFunctions = null;
+            if (parameterTypesInOrder != null)
+            {
+                var givenTypes = Reorder(parameterTypesInOrder, reordering).Cast<Type>().ToArray();
+                //эти функции при необходимости превращают одиночные объекты в массивы
+                conversingFunctions = new Func<object, object>[parametersInOrder.Length];
+                for(int i = 0;i<parametersInOrder.Length;i++)
+                {
+                    if (_types[i].IsAssignableFrom(givenTypes[i]) || _types[i] == typeof(string))
+                    {
+                        conversingFunctions[i] = o => o;
+                    }
+                    else if (IsTypeIsAnEnumerableOverOther(_types[i],givenTypes[i]))
+                    {
+                        var t = givenTypes[i];
+                        conversingFunctions[i] = o =>
+                                                     {
+                                                         var res = Array.CreateInstance(t, 1);
+                                                         res.SetValue(o, 0);
+                                                         return res;
+                                                     };
+                    }
+                    else
+                    {
+                        throw new ArgumentException(
+                            string.Format("The type {0} for parameter {1} can not be assigned to query type {2}",
+                            givenTypes[i],parametersInOrder[i],_types[i]));
+                    }
+                }
+            }
+
+
             if (_returnType == typeof(MultKeys))
             {
-                return args => (_queryMethod(Reorder(args, reordering)) as MultKeys).SelectMany(k => k.Value);
+                if (conversingFunctions == null)
+                  return args => (_queryMethod(Reorder(args, reordering)) as MultKeys).SelectMany(k => k.Value).Distinct();
+                else
+                {
+                    return args => (_queryMethod(Reorder(args.Select((k, i) => conversingFunctions[i](k)).ToArray(), reordering)) as MultKeys).SelectMany(k => k.Value).Distinct();
+                }
             }
             else if (_returnType == typeof(IEnumerable<Guid>))
             {
-                return args =>
+                if (conversingFunctions == null)
                 {
-                    var res = _queryMethod(Reorder(args, reordering)) as IEnumerable<Guid>;
-                    Debug.Assert(res != null);
-                    return res;
-                };
+                    return args =>
+                               {
+                                   var res = _queryMethod(Reorder(args, reordering)) as IEnumerable<Guid>;
+                                   Debug.Assert(res != null);
+                                   return res;
+                               };
+                }
+                else
+                {
+                    return args =>
+                    {
+                        var res = _queryMethod(Reorder(args.Select((k, i) => conversingFunctions[i](k)).ToArray(),
+                                                       reordering)) 
+                                              as IEnumerable<Guid>;
+                        Debug.Assert(res != null);
+                        return res;
+                    };
+                }
             }
             else
             {
@@ -151,7 +231,8 @@ namespace Dataspace.Common.ServiceResources
                 }
                 else
                 {
-                    throw new ArgumentException();
+                    methConv = (keys, args) =>
+                              keys.Select(key => new KeyValuePair<Guid, IEnumerable<Guid>>(key, method(new object[] { new[]{key} }.Concat(args).ToArray())));
                 }
             }
             else if (_returnType == typeof(MultKeys))
@@ -181,6 +262,12 @@ namespace Dataspace.Common.ServiceResources
             return order.Select(k => r[k]).ToArray();
         }
 
+        public Type[] GetParameterTypes(string[] parametersInOrder)
+        {
+            var order = CreateReorderSeq(parametersInOrder);
+            return Reorder(_types, order).Cast<Type>().ToArray();
+        }
+
         public IEnumerable<Guid> UriQuery(UriQuery query)
         {
             var args = from pair in query
@@ -193,7 +280,7 @@ namespace Dataspace.Common.ServiceResources
 
         internal static Query CreateTestStubQuery(string nmspc = null,Func<object[],object> func = null,params string[] pars)
         {
-            var query = new Query(new QueryInfo(Guid.NewGuid(), new ParameterNames(pars), nmspc),
+            var query = new Query(new QueryInfo(Guid.NewGuid(), new ParameterNames(pars), nmspc,null),
                                   Enumerable.Repeat(typeof(string), pars.Count()).ToArray(),
                                   typeof(IEnumerable<Guid>))
             {
@@ -206,7 +293,7 @@ namespace Dataspace.Common.ServiceResources
 
         internal static Query CreateTestStubMultipleQuery(string resource,params string[] pars)
         {
-            var query = new Query(new QueryInfo(Guid.NewGuid(), new ParameterNames(new[]{resource}.Concat(pars)), ""),
+            var query = new Query(new QueryInfo(Guid.NewGuid(), new ParameterNames(new[]{resource}.Concat(pars)), "",null),
                                   new[]{ typeof(IEnumerable<Guid>)}.Concat(Enumerable.Repeat(typeof(string), pars.Count())).ToArray(),
                                   typeof(MultKeys))
             {
@@ -219,7 +306,7 @@ namespace Dataspace.Common.ServiceResources
 
         internal static Query CreateFromFactory(Guid key,string resName, string nmspace, ParameterNames parameters,IResourceQuerierFactory querierFactory)
         {
-            var query = new Query(new QueryInfo(key, new ParameterNames(parameters), nmspace),
+            var query = new Query(new QueryInfo(key, new ParameterNames(parameters), nmspace,null),
                                   Enumerable.Repeat(typeof(string),parameters.Count()).ToArray(),
                                   typeof(IEnumerable<Guid>))
             {
@@ -227,6 +314,7 @@ namespace Dataspace.Common.ServiceResources
                 _queryMethod = k=> querierFactory.CreateQuerier(resName, nmspace,
                                                   parameters.ToArray())(k),              
             };
+          
             return query;
         }
 
@@ -234,10 +322,9 @@ namespace Dataspace.Common.ServiceResources
         {
             Debug.Assert(method !=null);
             var query = new Query(
-                new QueryInfo(key, new ParameterNames(method.GetParameters().Select(k => k.Name)), nmspace),
+                new QueryInfo(key, new ParameterNames(method.GetParameters().Select(k => k.Name)), nmspace,method),
                 method.GetParameters().Select(k => k.ParameterType).ToArray(),
-                method.ReturnType
-                )
+                method.ReturnType)
                             {
                                 _queryMethod = args=>method.Invoke(owner,args),
                                 _orderedArguments = method.GetParameters().Select(k => k.Name).ToArray()
@@ -263,9 +350,33 @@ namespace Dataspace.Common.ServiceResources
         {
             QueryInfo = header;
             _types = argTypes.ToArray();
-            _conversions = _types.Select(TypeDescriptor.GetConverter)
-                                .Select(k =>new Func<string, object>(k.ConvertFromString))
-                                .ToArray();
+            _conversions = _types.Select(
+                t =>
+                    {
+                        var collection = t.GetInterface(typeof (IEnumerable<>).FullName)
+                                      ??(  t.IsInterface 
+                                        && t.GetGenericTypeDefinition() !=null
+                                        && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                                      ?t
+                                      :null);
+                        if (collection != null && t != typeof(string))
+                        {
+                            var argType = collection.GetGenericArguments()[0];
+                            var conv = TypeDescriptor.GetConverter(argType);
+                            return new Func<string, object>(a=>
+                                                                {
+                                                                    var r = Array.CreateInstance(argType,1);
+                                                                    r.SetValue(conv.ConvertFromString(a),0);
+                                                                    return r;
+                                                                });
+                        }
+                        else
+                        {
+                            var conv = TypeDescriptor.GetConverter(t);
+                            return new Func<string, object>(conv.ConvertFromString);
+                        }
+                    }
+                ).ToArray();                             
             _returnType = returnType;
         }
     }

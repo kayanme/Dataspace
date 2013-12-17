@@ -77,9 +77,9 @@ namespace Resources.Test
             Assert.AreEqual(1, depth);;
             Assert.AreEqual(11, node.FindNode(11, 0, out depth));
             Assert.AreEqual(1, depth);
-            GC.Collect();
-            GC.Collect();
-            GC.Collect();
+            GC.Collect(2,GCCollectionMode.Forced);
+            GC.Collect(2, GCCollectionMode.Forced);
+            GC.Collect(2, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
             Assert.AreEqual(0, node.FindNode(9, 0, out depth));
             Assert.AreEqual(0, node.FindNode(11, 0, out depth));
@@ -114,7 +114,7 @@ namespace Resources.Test
             Assert.AreEqual(13, node.FindNode(13, 0, out depth));
             Assert.AreEqual(2, depth);
 
-            GC.Collect();
+            GC.Collect(2, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
             Assert.AreEqual(0, node.FindNode(7, 0, out depth));
             Assert.AreEqual(8, node.FindNode(8, 0, out depth));
@@ -126,7 +126,7 @@ namespace Resources.Test
             Assert.AreEqual(12, node.FindNode(12, 0, out depth));
             Assert.AreEqual(1, depth);
             Assert.AreEqual(0, node.FindNode(13, 0, out depth));
-            GC.Collect();
+            GC.Collect(2, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
             Assert.AreEqual(0, node.FindNode(7, 0, out depth));
             Assert.AreEqual(0, node.FindNode(8, 0, out depth));
@@ -177,7 +177,7 @@ namespace Resources.Test
             #endregion
 
             #region First collection
-            GC.Collect();
+            GC.Collect(2, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
             Assert.AreEqual(0, node.FindNode(7, 0, out depth));
             depth = 0;
@@ -197,7 +197,7 @@ namespace Resources.Test
             Assert.AreEqual(0, node.FindNode(13, 0, out depth));
             #endregion
 
-            GC.Collect();
+            GC.Collect(2, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
             Assert.AreEqual(0, node.FindNode(7, 0, out depth));
             Assert.AreEqual(8, node.FindNode(8, 0, out depth));

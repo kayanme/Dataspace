@@ -68,6 +68,7 @@
     <Compile Include="Caching\AccumulatingTestWithCache.cs" />
     <Compile Include="Queries\ParamNamesTest.cs" />
     <Compile Include="Queries\QueriesTest.cs" />
+    <Compile Include="Queries\MultipleQueryingTest.cs" />
     <Compile Include="Utility\AccumulationDictionaryTest.cs" />
     <Compile Include="Caching\StrictBalancingTest.cs" />
     <Compile Include="Caching\ComparerCheck.cs" />

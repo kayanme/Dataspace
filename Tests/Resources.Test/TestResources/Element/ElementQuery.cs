@@ -18,6 +18,8 @@ namespace Resources.Test.TestResources
         private ResourcePool _pool;
 #pragma warning restore 0649
 
+        public static bool WasCalledMultiple = false;
+
         [IsQuery]
         public IEnumerable<Guid> ByModelName(string modelName)
         {
@@ -43,6 +45,13 @@ namespace Resources.Test.TestResources
         }
 
         [IsQuery]
+        public IEnumerable<KeyValuePair<Guid,IEnumerable<Guid>>> ByModelIdMult(IEnumerable<Guid> model)
+        {
+            WasCalledMultiple = true;
+            return model.ToDictionary(k => k, ByModelId);
+        }
+
+       
         public IEnumerable<Guid> ByModelId(string modelName, Guid modelId)
         {
 
@@ -52,6 +61,27 @@ namespace Resources.Test.TestResources
                 .Select(k => k.Key)
                 .ToArray();
 
+        }
+
+        [IsQuery]
+        public IEnumerable<KeyValuePair<Guid, IEnumerable<Guid>>> ByModelIdMult(IEnumerable<Guid> model, string modelName)
+        {
+            WasCalledMultiple = true;
+            return model.ToDictionary(k => k, k=>ByModelId(modelName,k));
+        }
+
+        [IsQuery]
+        public IEnumerable<KeyValuePair<Guid, IEnumerable<Guid>>> ByModelIdAndElementName(IEnumerable<Guid> model, string elementName)
+        {
+           WasCalledMultiple = true;
+          var res =              
+               model.ToDictionary(modelId=>modelId,modelId=>
+               _pool.Models.Values.Where(k => k.Key == modelId)
+                 .Select(k => k.Key)
+                 .SelectMany(k => _pool.Elements.Where(k2 => k2.Value.Model == k && k2.Value.Name == elementName))
+                 .Select(k => k.Key)
+                 .ToArray().AsEnumerable());
+            return res;
         }
 
         [IsQuery]

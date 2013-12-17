@@ -144,7 +144,8 @@ namespace Resources.Test
                 Assert.AreEqual(expectedElement, actualElement);
 
                 var actualElements = target.Query<Element>(
-                    new UriQuery { { "ModelName", _dependentModel.Name } , {"ModelId",_singleModel.Key.ToString()} }).ToArray();
+                    new UriQuery { { "ElementName", _dependentElement.Name } , 
+                                   {"Model",    _dependentModel.Key.ToString()} }).ToArray();
                 Assert.AreEqual(1,actualElements.Count());
                 Assert.AreEqual(expectedElement, actualElements[0]);
 

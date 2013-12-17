@@ -30,7 +30,7 @@ namespace  Projections.Test.Data
  	   [Import]
 	   private ResourcePool _resourcePool;
 #pragma warning restore 0649
-       public override IEnumerable<T> GetItems<T>(Expression<Func<T, bool>> predicate) 
+       protected override IEnumerable<T> QueryItems<T>(Expression<Func<T, bool>> predicate) 
 	   {
         if (typeof(T) == typeof(Attribute))
 	     {

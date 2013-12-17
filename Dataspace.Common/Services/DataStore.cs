@@ -5,6 +5,8 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Text;
 using System.Transactions;
 using Dataspace.Common.Announcements;
@@ -22,7 +24,7 @@ namespace Dataspace.Common.Services
 {
 
     
-    internal sealed class DataStore
+    internal sealed class DataStore:IDisposable 
     {
         private class ResUnactComparer : IEqualityComparer<UnactualResourceContent>
         {
@@ -61,6 +63,8 @@ namespace Dataspace.Common.Services
 
             [Import]
             public TransactedResourceManager _resourceManager;
+
+           
         }
 
         private DataStoreServicesPackage _services;
@@ -78,6 +82,9 @@ namespace Dataspace.Common.Services
         private readonly List<Action<Guid>> _updateDependenciesByQueries = new List<Action<Guid>>();
 
         private dynamic _accumulator;
+
+        private event Action<UnactualResourceContent> _unactualityAnnounce;
+        private readonly IDisposable _unactualitiesToken;
 
         private readonly TransitionStorage _storage = new TransitionStorage();
      
@@ -106,6 +113,11 @@ namespace Dataspace.Common.Services
             _poster = poster;
             if (_poster != null)
               _poster.SetStatChannel(_getter.StatChannel);
+
+            _unactualitiesToken = Observable.FromEvent<UnactualResourceContent>
+                (h => _unactualityAnnounce += h, h => _unactualityAnnounce -= h)
+                .ObserveOn(NewThreadScheduler.Default)
+                .Subscribe(_services._intCachier.MarkForUpdate);
         }
 
         private ICachierStorage<Guid> GetStorageForResource(StatisticsCollector statisticsCollector)
@@ -140,7 +152,7 @@ namespace Dataspace.Common.Services
         internal void ProcessChildQueriedCaching(DataStore parentGetter)
         {
             var parType = _services.GenericPool.GetTypeByName(parentGetter.Name);
-            var parentsQuery = _services._queryStorage.FindQuery(parType, "", new[] { Name });
+            var parentsQuery = _services._queryStorage.FindQuery(parType, "", new[] { Name },new[]{typeof(Guid)});
 
             _updateDependenciesByQueries.Add(id =>
             {
@@ -315,7 +327,16 @@ namespace Dataspace.Common.Services
                 if (_poster == null)
                     throw new InvalidOperationException("There is no poster for resource "+_name);
                 _poster.WriteResourceRegardlessofTransaction(key, resource);
-                _services._intCachier.MarkForUpdate(new UnactualResourceContent { ResourceName = Name, ResourceKey = key });
+                var update = new UnactualResourceContent {ResourceName = Name, ResourceKey = key};
+                if (_unactualityAnnounce != null && _services._settingsHolder.Settings.AsyncronousUpdates)
+                {
+                    _unactualityAnnounce(update);
+                }
+                else
+                {
+                    _services._intCachier.MarkForUpdate(update);
+                }
+             
             }
             catch (Exception ex)
             {
@@ -330,7 +351,8 @@ namespace Dataspace.Common.Services
                                                        {
                                                           if (o != null)
                                                               WriteResource(key, o);
-                                                            DeleteResource(key);
+                                                          else
+                                                              DeleteResource(key);
                                                        });
 
             _services._resourceManager.AddResourceToSend(
@@ -352,5 +374,9 @@ namespace Dataspace.Common.Services
                 }        
         }
 
+        public void Dispose()
+        {
+            _unactualitiesToken.Dispose();
+        }
     }
 }

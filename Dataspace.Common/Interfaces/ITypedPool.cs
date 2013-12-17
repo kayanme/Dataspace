@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Security;
 using Dataspace.Common.Data;
 
@@ -75,6 +76,16 @@ namespace Dataspace.Common.Interfaces
         /// <returns>Функция для запроса, принимающая именованые аргументы вида (name:"")</returns>
         IEnumerable<Guid> Find<T>(object query,string namespc = "");
 
+        /// <summary>
+        /// Получает ресурсы, используя альтернативный синтаксис.
+        /// </summary>
+        /// <typeparam name="T">Тип ресурса</typeparam>
+        /// <param name="query">Запрос </param>
+        /// <param name="resourceToGroup">Название ресурса, по которому группировать </param>
+        /// <param name="namespc">Пространство имен запроса.</param>
+        /// <returns>Функция для запроса, принимающая именованые аргументы вида (name:"")</returns>
+        IEnumerable<KeyValuePair<Guid, IEnumerable<Guid>>> FindAndGroup<T>(object query, string resourceToGroup, string namespc = "");
+
         dynamic Spec { get; } 
     }
 
@@ -116,6 +127,14 @@ namespace Dataspace.Common.Interfaces
 
         public IEnumerable<Guid> Find<T>(object query, string namespc = "")
         {
+            return null;
+        }
+
+        public IEnumerable<KeyValuePair<Guid, IEnumerable<Guid>>> FindAndGroup<T>(object query, string resourceToGroup, string namespc = "")
+        {
+            Contract.Requires(query != null);
+            Contract.Requires(!string.IsNullOrEmpty(resourceToGroup));
+            Contract.Ensures(Contract.Result<IGrouping<Guid, Guid>>() != null);
             return null;
         }
 

@@ -92,6 +92,11 @@ namespace Resources.Notification.Test.Resource.Level2Providers
             return new Token(this, observer);
         }
 
+        public override void Dispose()
+        {
+            
+        }
+
 
         private void Unsubscribe(IObserver<ResourceDescription> observer)
         {

@@ -46,71 +46,69 @@ namespace Dataspace.Common.Services
 
         public const string QuerySpace = "http://metaspace.org/QuerySchema";
 
-        private Query FindQueryInNamespaceToExecute(
+        private IEnumerable<Query> FindQueriesInNamespaceToExecute(
                     Guid resKey,
                     string nmspace,
                     ParameterNames parameters)
         {
 
-            var exactQuery = _baseQueries.FirstOrDefault(k => k.QueryInfo.ResourceKey == resKey
-                                                              &&
-                                                              _parameterComparer.Equals(k.QueryInfo.Namespace, nmspace)
-                                                              && k.QueryInfo.ArgCount == parameters.Count
-                                                              && parameters == k.QueryInfo.Arguments);
+            var exactQuery = _baseQueries.Where(k => k.QueryInfo.ResourceKey == resKey
+                                                     &&
+                                                     _parameterComparer.Equals(k.QueryInfo.Namespace, nmspace)
+                                                     && k.QueryInfo.ArgCount == parameters.Count
+                                                     && parameters == k.QueryInfo.Arguments).ToArray();
 
 
-            if (exactQuery != null)
-            {
-                return exactQuery;
-            }
-            return null;
+
+            return exactQuery;
+
 
         }
 
-        private Query FindInCache(Guid key,string nmspace,ParameterNames parameters)
+        private IEnumerable<Query> FindInCache(Guid key,string nmspace,ParameterNames parameters)
         {
             lock (_cachedQueries)
-               return _cachedQueries.FirstOrDefault(k => k.ResourceKey == key && k.Namespace == nmspace && k.Arguments == parameters);
+               return _cachedQueries.Where(k => k.ResourceKey == key && k.Namespace == nmspace && k.Arguments == parameters);
         }       
 
-        private void AddQueryToCache(Query query)
+        private void AddQueryToCache(IEnumerable<Query> queries)
         {
             lock (_cachedQueries)
-               _cachedQueries.Add(query);
+                _cachedQueries.AddRange(queries);
         }
 
-        private Query BuildOrFindQueryToExecute(Type type, string nmspace, ParameterNames parameters)
+        private IEnumerable<Query> BuildOrFindQueryToExecute(Type type, string nmspace, ParameterNames parameters)
         {
             Contract.Requires(parameters != null);
             Contract.Ensures(Contract.Result<FormedQuery>() != null);         
             if (!_registrationStorage.IsResourceRegistered(type))
                 throw new InvalidOperationException("Невозможно найти запрос (не зарегистрирован тип " + type + ").");
             var key = _registrationStorage[type].ResourceKey;
-            var query = FindInCache(key, nmspace, parameters);
-            if (query == null)
+            var queries = FindInCache(key, nmspace, parameters);
+            if (!queries.Any())
             {
-               
-                query = FindQueryInNamespaceToExecute(key, nmspace, parameters);                                    
-                
-                if (query == null && nmspace != "")
+
+                queries = FindQueriesInNamespaceToExecute(key, nmspace, parameters);
+
+                if (!queries.Any() && nmspace != "")
                 {
-                    query = FindQueryInNamespaceToExecute(key, "", parameters);
+                    queries = FindQueriesInNamespaceToExecute(key, "", parameters);
                 }
 
-                if (query == null && _querierFactory != null)
+                if (!queries.Any() && _querierFactory != null)
                 {
-                    query =Query.CreateFromFactory(key,_registrationStorage[key].ResourceName, nmspace, parameters,_querierFactory);
+                    queries = new[] { Query.CreateFromFactory(key, _registrationStorage[key].ResourceName, nmspace, parameters, _querierFactory) };
                 }
 
-                if (query !=null)
-                    AddQueryToCache(query);
+                if (queries.Any())
+                    AddQueryToCache(queries);
             }
 
-            if (query ==null)
+            if (!queries.Any())
                 throw new InvalidOperationException("Невозможно найти запрос для типа "
                                                    + type + "(не найден обработчик). Запрос: "
                                                    + parameters);
-            return query;
+            return queries;
         }
 
         public Func<UriQuery, IEnumerable<Guid>> FindQuery(Type type, string nmspace, UriQuery query)
@@ -118,17 +116,37 @@ namespace Dataspace.Common.Services
             Contract.Requires(query != null);            
             Contract.Ensures(Contract.Result<Func<UriQuery, IEnumerable<Guid>>>() != null);
             Debug.Assert(query != null);
-            var matchedQuery = BuildOrFindQueryToExecute(type, nmspace, new ParameterNames(query));
-            return matchedQuery.UriQuery;
+            var matchedQueries = BuildOrFindQueryToExecute(type, nmspace, new ParameterNames(query));
+            return matchedQueries.First().UriQuery;
         }
 
-        public FormedQuery FindQuery(Type type, string nmspace, string[] parameters)
+        public FormedQuery FindQuery(Type type, string nmspace, string[] parameters,Type[] paramTypes)
         {
             Contract.Requires(parameters != null);
             Contract.Ensures(Contract.Result<FormedQuery>() != null);
             Debug.Assert(parameters != null);
-            var matchedQuery = BuildOrFindQueryToExecute(type, nmspace, new ParameterNames(parameters));
-            return matchedQuery.GetQueryMethod(parameters);
+            var matchedQueries = BuildOrFindQueryToExecute(type, nmspace, new ParameterNames(parameters));
+            Debug.Assert(matchedQueries.Any(), "matchedQuery.Any()");
+           
+            var query = matchedQueries.FirstOrDefault(k => k.TypesAreCompletlyMatch(parameters, paramTypes))
+                 ?? matchedQueries.FirstOrDefault(k => k.CanMakeAQueryForArgumentTypes(parameters, paramTypes));
+            if (query==null)
+                throw new ArgumentException("A query with given parameters was found, but parameters types mismatch");
+            return query.GetQueryMethod(parameters,paramTypes);
+        }
+
+
+
+        public QueryForMultipleParentResource FindQueryWithGrouping(string resource, Type type, string nmspace, string[] parameters, Type[] paramTypes)
+        {
+            Contract.Requires(parameters != null);
+            Contract.Ensures(Contract.Result<FormedQuery>() != null);
+            Debug.Assert(parameters != null);
+            var matchedQueries = BuildOrFindQueryToExecute(type, nmspace, new ParameterNames(parameters));
+            Debug.Assert(matchedQueries.Any(), "matchedQuery.Any()");
+            var query = matchedQueries.FirstOrDefault(k => k.SerialQueryIsPreferred(resource))
+                     ?? matchedQueries.First();
+            return query.GetMultipleChildResourceQuery(resource, parameters.Except(new[] {resource}).ToArray());
         }
 
         public IEnumerable<Query> FindAppropriateQueries(string nmspc,string parentResource,string childResource)        
@@ -142,6 +160,7 @@ namespace Dataspace.Common.Services
 
         }
               
+       
 
         internal void Initialize(IEnumerable<ResourceQuerier> queriers)
         {

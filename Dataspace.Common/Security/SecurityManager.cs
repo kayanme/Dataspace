@@ -158,7 +158,7 @@ namespace Dataspace.Common.Security
         public void Initialize()
         {
             _preparsedGetters = _getters
-                       .Where(k =>_settingsHolder.Settings.FlagsMatch(k.Metadata.Switch as Enum[]))
+                       .Where(k =>_settingsHolder.Settings.ActivationSwitchMatch(k.Metadata,_settingsHolder.Provider))
                        .GroupBy(k => k.Value.GetType().BaseType.GetGenericArguments()[0])
                        .Select(k=>k.First().Value)
                        .ToDictionary(k => k.GetType().BaseType.GetGenericArguments()[0]);

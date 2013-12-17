@@ -82,7 +82,7 @@ namespace Resources.Notification.Test.UnitTests
             _uplink.Expect(k => k.OnNext(null)).IgnoreArguments().Repeat.Once();            
             _mockRepository.ReplayAll();            
             var id = Guid.NewGuid();
-            _subscriptor.SubscribeForResourceChange("NotifiedElement",id);          
+            _subscriptor.SubscribeForResourceChangePropagation("NotifiedElement", id);          
             _pool.Post(id, new NotifiedElement());
             _mockRepository.VerifyAll();
         }

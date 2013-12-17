@@ -19,6 +19,7 @@ namespace Resources.Notification.Test
         [TestCategory("Caching")]
         public void NoTransaction()
         {
+            Settings.NoCacheGarbageChecking = true;
             const string notChanged = "Not Changed"; 
             const string changed = "Changed";
            
@@ -60,8 +61,6 @@ namespace Resources.Notification.Test
             _level2Interaction.Post(ne1.Key, new NotifiedElement { Key = ne1.Key, Name = notChanged });
             _level2Interaction.Post(une1.Key, new UnnotifiedElement { Key = une1.Key, Name = notChanged });
             _level2Interaction.Subscribe();
-
-
 
             #region Checking results after subscription and preparing for change tracking
             resne = _level2Interaction.Get<NotifiedElement>(ne1.Key);

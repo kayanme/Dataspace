@@ -96,9 +96,7 @@ namespace Resources.Test.Caching
                     }
                 }
             }           
-
-            Assert.AreEqual(cache.State.ExpectedRate, cache.State.Rate, 2);
-            Assert.IsTrue(_wasRebalancing);
+                    
         }
 
 

@@ -10,6 +10,8 @@ using Resources.Test.TestResources;
 namespace Resources.Notification.Test.Resource.Level1Providers
 {
 
+    
+    [Export]
     [Export(typeof(ResourceGetter))]
     public class NotifiedElementGetter:ResourceGetter<NotifiedElement>
     {

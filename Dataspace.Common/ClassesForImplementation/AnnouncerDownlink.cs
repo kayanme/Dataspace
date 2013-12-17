@@ -11,20 +11,25 @@ namespace Dataspace.Common.ClassesForImplementation
     /// Класс для реализации очереди сообщение об обновлении нижележащего слоя.
     /// </summary>
     [ContractClass(typeof(AnnouncerDownlinkContract))]
-    public abstract class AnnouncerDownlink : IObservable<ResourceDescription>
+    public abstract class AnnouncerDownlink : IObservable<ResourceDescription>,IDisposable
     {
         public abstract IDisposable Subscribe(IObserver<ResourceDescription> observer);
-       
+
+        public abstract void Dispose();
     }
 
     [ContractClassFor(typeof(AnnouncerDownlink))]
-    public abstract class AnnouncerDownlinkContract : AnnouncerDownlink
+    public class AnnouncerDownlinkContract : AnnouncerDownlink
     {
         public override IDisposable Subscribe(IObserver<ResourceDescription> observer)
         {
             Contract.Requires(observer!=null);
             Contract.Ensures(Contract.Result<IDisposable>() !=null);
             return null;
+        }
+
+        public override void Dispose()
+        {            
         }
     }
 }

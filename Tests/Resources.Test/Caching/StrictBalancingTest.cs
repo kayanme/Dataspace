@@ -19,6 +19,7 @@ namespace Resources.Test
         private CacheNode<int, double> BuildTree(int[] frequences,  int maxFixedBranchDepth = 0)
         {
             var freqSum = frequences.Sum();
+            
             var root = new CacheNode<int, double>(0, (double)frequences[0] / freqSum, maxFixedBranchDepth, Comparer<int>.Default, probabilityCalc: k => (float)k);
             var frs = Enumerable.Range(0, frequences.Length).ToList();
             var rnd = new Random();

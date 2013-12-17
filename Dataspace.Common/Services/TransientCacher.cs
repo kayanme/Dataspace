@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -254,8 +255,13 @@ namespace Common
         }
 
         public void Dispose()
-        {            
-           _registrationStorage.FlushRegistraions();          
+        {
+            _subscriptor.Dispose();
+           _registrationStorage.FlushRegistraions();
+            foreach (var dataStore in _stores)
+            {
+                dataStore.Value.Dispose();
+            }
         }
 
         private IEnumerable<Type> GetResourceTypeForCurrentBaseType(Type parentType, Type childType)
@@ -344,6 +350,16 @@ namespace Common
             public readonly List<string> Names = new List<string>();
             public readonly List<object> Args = new List<object>();
 
+            public object this[string name]
+            {
+                get { 
+                    var index = Names.FindIndex(k => k == name);
+                    if (index == -1)
+                        throw new ArgumentException("No such parameter in query");
+                    return Args[index];
+                }
+            }
+
             public override bool TryInvoke(InvokeBinder binder, object[] args, out object result)
             {
                 lock (_lock)
@@ -391,8 +407,37 @@ namespace Common
         {
             var t = query as DynamicQuery;            
             if (t == null)
-                throw new ArgumentException("Запрос должен быть создан с использованием свойства Query");
-            return _storage.FindQuery(type, namespc, t.Names.ToArray())(t.Args.ToArray());          
+                throw new ArgumentException("Запрос должен быть создан с использованием свойства Spec");
+            return _storage.FindQuery(type, namespc, t.Names.ToArray(), t.Args.Select(k=>k.GetType()).ToArray())(t.Args.ToArray());          
+        }
+
+        private IEnumerable<KeyValuePair<Guid,IEnumerable<Guid>>> FindAndGroupCommon(Type type,object query, string resourceToGroup, string namespc = "")
+        {
+            var t = query as DynamicQuery;
+            if (t == null)
+                throw new ArgumentException("Запрос должен быть создан с использованием свойства Spec");
+            var foundQuery = _storage.FindQueryWithGrouping(resourceToGroup, type, namespc, t.Names.ToArray(),
+                                                            t.Args.Select(k=>t.GetType()).ToArray());
+            var group = t[resourceToGroup];
+            IEnumerable<Guid> resPack;
+            if (group is IEnumerable<Guid>)
+                resPack = group as IEnumerable<Guid>;
+            else if (group is Guid)
+            {
+                resPack = new[] {(Guid) group};
+            }
+            else throw new ArgumentException("Grouping resource parameter is neither a Guid or IEnumerable<Guid>");
+            var res =  foundQuery(resPack, t.Names.Where(k2=>resourceToGroup != k2).Select(k => t[k]).ToArray());
+
+            return res;
+        }
+
+
+
+        public IEnumerable<KeyValuePair<Guid, IEnumerable<Guid>>> FindAndGroup<T>(object query, string resourceToGroup, string namespc = "")
+        {
+            CheckInitialization();
+            return FindAndGroupCommon(typeof (T), query, resourceToGroup, namespc);
         }
 
         public dynamic Spec { get { return new DynamicQuery(); } }

@@ -21,6 +21,11 @@ namespace PerfTest.Classes
             return null;
         }
 
+        public override void Dispose()
+        {
+            
+        }
+
         public void Next(ResourceDescription descr)
         {
             _cache.OnNext(descr);

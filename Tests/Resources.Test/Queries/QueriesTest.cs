@@ -99,7 +99,7 @@ namespace Resources.Test
         public void ExecuteSimpleMethod()
         {
             var q = GetQueryFor("SimpleQuery");
-            var method = q.GetQueryMethod("name");
+            var method = q.GetQueryMethod(new[]{"name"});
             Assert.AreEqual(Guid.Empty, method("!").Single());
         }
 
@@ -108,7 +108,7 @@ namespace Resources.Test
         public void ExecuteTwoArgSimpleMethod()
         {
             var q = GetQueryFor("SimpleQuery");
-            var method = q.GetQueryMethod("type","name");
+            var method = q.GetQueryMethod(new[]{"type","name"});
             Assert.AreEqual(Guid.Empty, method("Type", "Name").Single());
         }
 
@@ -117,8 +117,17 @@ namespace Resources.Test
         public void ExecuteSeriaMethodAsSimple()
         {
             var q = GetQueryFor("SeriaQuery");
-            var method = q.GetQueryMethod("resource");
+            var method = q.GetQueryMethod(new[]{"resource"});
             Assert.AreEqual(Guid.Empty, method(new[]{Guid.Empty}).Single());
+        }
+
+        [TestMethod]
+        [TestCategory("Queries")]
+        public void ExecuteSeriaMethodAsSimpleWithArgumentAsASingleValue()
+        {
+            var q = GetQueryFor("SeriaQuery");
+            var method = q.GetQueryMethod(new[] { "resource" },new[] {typeof(Guid)});
+            Assert.AreEqual(Guid.Empty, method(Guid.Empty).Single());
         }
 
         [TestMethod]
@@ -126,8 +135,17 @@ namespace Resources.Test
         public void ExecuteSeriaMethodWithParamsAsSimple()
         {
             var q = GetQueryFor("SeriaQueryWithArg");
-            var method = q.GetQueryMethod("name","resource");
+            var method = q.GetQueryMethod(new[]{"name","resource"});
             Assert.AreEqual(Guid.Empty, method("Name",new[] { Guid.Empty }).Single());
+        }
+
+        [TestMethod]
+        [TestCategory("Queries")]
+        public void ExecuteSeriaMethodWithParamsAsSimpleWithArgumentAsASingleValue()
+        {
+            var q = GetQueryFor("SeriaQueryWithArg");
+            var method = q.GetQueryMethod(new[] { "name", "resource" },new[] {typeof(string),typeof(Guid)});
+            Assert.AreEqual(Guid.Empty, method("Name", Guid.Empty ).Single());
         }
 
         [TestMethod]
@@ -148,6 +166,7 @@ namespace Resources.Test
             Assert.AreEqual(Guid.Empty, method(new[]{Guid.Empty}).Single().Key);
             Assert.AreEqual(Guid.Empty, method(new[] { Guid.Empty }).Single().Value.Single());
         }
+      
 
         [TestMethod]
         [TestCategory("Queries")]

@@ -49,14 +49,14 @@ namespace Resources.Notification.Test.Resource
             if (_observer != null)
             {
                 _observer.OnNext(res);
-                _subscriptor.UnsubscribeForResourceChange(res.ResourceName, res.ResourceKey);
+                _subscriptor.UnsubscribeForResourceChangePropagation(res.ResourceName, res.ResourceKey);
             }
         }
 
         public T Get<T>(Guid key,bool subscribe) where T:class
         {
-            if (subscribe)               
-                    _subscriptor.SubscribeForResourceChange(typeof (T).Name, key);                                 
+            if (subscribe)
+                _subscriptor.UnsubscribeForResourceChangePropagation(typeof(T).Name, key);                                 
             return _activator.Get<T>(key);
         }
 
@@ -72,12 +72,12 @@ namespace Resources.Notification.Test.Resource
 
         public void Subscribe(string resourceName,Guid id)
         {
-            _subscriptor.SubscribeForResourceChange(resourceName, id);
+            _subscriptor.SubscribeForResourceChangePropagation(resourceName, id);
         }
 
         public void Unsubscribe(string resourceName, Guid id)
-        {           
-           _subscriptor.UnsubscribeForResourceChange(resourceName,id);
+        {
+            _subscriptor.UnsubscribeForResourceChangePropagation(resourceName, id);
         }
     }
 }

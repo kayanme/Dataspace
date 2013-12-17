@@ -24,6 +24,8 @@ namespace Dataspace.Common.Data
         /// </summary>
         public bool CheckMode = false;
 
+        public bool AsyncronousUpdates = true;
+
         /// <summary>
         /// Учитывать наследование данных
         /// </summary>

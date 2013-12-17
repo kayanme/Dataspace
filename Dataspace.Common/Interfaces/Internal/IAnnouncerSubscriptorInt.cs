@@ -5,7 +5,7 @@ namespace Dataspace.Common.Interfaces.Internal
     /// <summary>
     /// Внутренний интерфейс работы с подписками.
     /// </summary>
-    internal interface IAnnouncerSubscriptorInt:IAnnouncerSubscriptor
+    internal interface IAnnouncerSubscriptorInt:IAnnouncerSubscriptor,IDisposable
     {
         /// <summary>
         /// Публикует изменение актуальности токена безопасности.

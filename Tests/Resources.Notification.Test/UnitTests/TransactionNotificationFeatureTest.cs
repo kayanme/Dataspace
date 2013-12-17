@@ -128,7 +128,7 @@ namespace Resources.Notification.Test.UnitTests
         {
                 _uplink.Replay();       
                 var id = Guid.NewGuid();
-                _subscriptor.SubscribeForResourceChange("NotifiedElement", id);
+                _subscriptor.SubscribeForResourceChangePropagation("NotifiedElement", id);
                 _pool.Post(id, new NotifiedElement());
         }
 

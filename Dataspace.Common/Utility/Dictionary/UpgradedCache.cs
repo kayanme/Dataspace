@@ -86,7 +86,7 @@ namespace Dataspace.Common.Utility.Dictionary
             var eqComparer = eqcomparer ?? EqualityComparer<T>.Default;
            
             _secondLevelCache = new SecondLevelCache<T, TElementType>(comparer, k => k.GetFrequency(), queueRebalance ?? QueueRebalance);
-            _firstLevelCache = new WeakReference(new ConcurrentDictionary<T, TElementType>(eqComparer));
+            _firstLevelCache = new WeakReference(_lowItemsCountFixing = new ConcurrentDictionary<T, TElementType>(eqComparer));
         }
 
 
