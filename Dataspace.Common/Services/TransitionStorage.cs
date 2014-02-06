@@ -29,6 +29,12 @@ namespace Dataspace.Common.Services
 
         }
 
+        internal bool IsTransitionEmpty
+        {
+            get { return _dataStack == null && _unactualStack == null; }
+        }
+
+
         internal void PutMarkedObject(string name, Guid id)
         {
             if (_unactualStack == null)

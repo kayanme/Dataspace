@@ -79,7 +79,7 @@ namespace Dataspace.Common.Utility.Dictionary
 
 
 
-        public UpgradedCache(IComparer<T> comparer = null, IEqualityComparer<T> eqcomparer = null,Action<Action> queueRebalance = null)
+        public UpgradedCache(bool cleanRareItems = true,IComparer<T> comparer = null, IEqualityComparer<T> eqcomparer = null,Action<Action> queueRebalance = null)
         {
             _state = new CacheState(this);
             comparer = comparer ?? Comparer<T>.Default;
@@ -90,8 +90,8 @@ namespace Dataspace.Common.Utility.Dictionary
         }
 
 
-        protected UpgradedCache(IStatChannel channel, StatisticsCollector collector, IComparer<T> comparer = null, IEqualityComparer<T> eqcomparer = null, Action<Action> queueRebalance = null)
-            : this(comparer,eqcomparer,queueRebalance)
+        protected UpgradedCache(IStatChannel channel, StatisticsCollector collector, bool cleanRareItems = true, IComparer<T> comparer = null, IEqualityComparer<T> eqcomparer = null, Action<Action> queueRebalance = null)
+            : this(cleanRareItems,comparer, eqcomparer, queueRebalance)
         {
            
             _channel = channel;

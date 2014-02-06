@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Dataspace.Common.Data;
 using Dataspace.Common.Interfaces;
 using Dataspace.Common.Statistics;
 using Dataspace.Common.Utility.Dictionary;
@@ -13,8 +14,8 @@ namespace Dataspace.Common.Services
     internal sealed class CurrentCachierStorageNoRef : UpgradedCache<Guid, object, NoReferenceUpdatableElement<object>>, ICachierStorage<Guid>
     {
         
-        public CurrentCachierStorageNoRef(IStatChannel channel, StatisticsCollector collector) 
-            : base(channel,collector)
+        public CurrentCachierStorageNoRef(IStatChannel channel, StatisticsCollector collector,CachierStorageSettings settings)
+            : base(channel, collector, settings.KeepAllItems)
         {
             
         }
@@ -26,8 +27,8 @@ namespace Dataspace.Common.Services
     internal sealed class CurrentCachierStorageRef : UpgradedCache<Guid, object, UpdatableElement<object>>, ICachierStorage<Guid>
     {
 
-        public CurrentCachierStorageRef( IStatChannel channel, StatisticsCollector collector)
-            : base( channel, collector)
+        public CurrentCachierStorageRef(IStatChannel channel, StatisticsCollector collector, CachierStorageSettings settings)
+            : base(channel, collector, settings.KeepAllItems)
         {
             
         }

@@ -18,7 +18,7 @@ namespace Dataspace.Common.Transactions
 
         
        
-        private T GetStorage<T>(Func<T> creator, Dictionary<Transaction, T> localstorage) where T : IEnlistmentNotification
+        private T GetStorage<T>(Func<T> creator, Dictionary<Transaction, T> localstorage) where T : IPromotableSinglePhaseNotification
         {
             lock (localstorage)
             {
@@ -28,7 +28,7 @@ namespace Dataspace.Common.Transactions
                 var storage = creator();
                 localstorage.Add(key,storage);
                 Transaction.Current.TransactionCompleted += KillStorage<T>;
-                Transaction.Current.EnlistVolatile(storage,EnlistmentOptions.EnlistDuringPrepareRequired);                                              
+                Transaction.Current.EnlistPromotableSinglePhase(storage);                                              
                 return storage;
             }
         }

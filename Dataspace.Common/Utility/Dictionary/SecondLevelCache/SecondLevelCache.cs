@@ -326,11 +326,12 @@ namespace Dataspace.Common.Utility.Dictionary
        
         public SecondLevelCache(IComparer<TKey> comparer,
             Func<TValue,float> frequencyCalc,            
-            Action<Action> rebalanceQueue = null)
+            Action<Action> rebalanceQueue = null,
+            bool fixAllLevels = false)
         {
             _comparer = comparer;
             _state = new CacheState(this);
-            _cacheController = new CacheController<TKey, TValue>(this);
+            _cacheController = new CacheController<TKey, TValue>(this,fixAllLevels);
             _queueRebalance = rebalanceQueue?? (a=>a());
             _frequencyCalc = frequencyCalc;
          

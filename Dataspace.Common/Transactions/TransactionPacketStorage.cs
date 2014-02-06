@@ -33,6 +33,8 @@ namespace Dataspace.Common.Transactions
 
         private readonly Queue<DataRecord> _resourcesToWrite = new Queue<DataRecord>();
 
+        private readonly List<DataRecord> _resourcesInLocalTransaction = new List<DataRecord>();
+
         private readonly MemoryStream _stream = new MemoryStream();
 
         private readonly BinaryFormatter _formatter = new BinaryFormatter();
@@ -73,7 +75,8 @@ namespace Dataspace.Common.Transactions
 
         public IEnumerable<DataRecord> QueryResources(string type,Func<object,bool> query)
         {
-            return _resourcesToWrite.Where(k => k.Content.ResourceName == type && k.Resource != null)                
+            return _resourcesInLocalTransaction.Concat(_resourcesToWrite)
+                                    .Where(k => k.Content.ResourceName == type && k.Resource != null)                
                                     .Where(k=>query(k.Resource));
         }
 
@@ -123,6 +126,34 @@ namespace Dataspace.Common.Transactions
             }
         }
 
+        public void AddResourceToLocalTransaction(UnactualResourceContent description,object resource)
+        {
+            
+                try
+                {
+                    _resourceWriterQueueLock.EnterUpgradeableReadLock();
+                    var existingResource = _resourcesInLocalTransaction.FirstOrDefault(k => k.Content.Equals(description));                  
+                    try
+                    {
+                        _resourceWriterQueueLock.EnterWriteLock();
+                        if (existingResource != null) //если найден уже записанный в данной транзакции ресурс
+                            existingResource.Resource = resource;
+                        else
+                            _resourcesInLocalTransaction.Add(new DataRecord(description,resource));
+                    }
+                    finally
+                    {
+                        _resourceWriterQueueLock.ExitWriteLock();
+                    }
+
+                }
+                finally
+                {
+                    _resourceWriterQueueLock.ExitUpgradeableReadLock();
+                }
+            
+        }
+
         internal void WriteResources()
         {
             if (_resourcesToWrite.Any())
@@ -167,14 +198,7 @@ namespace Dataspace.Common.Transactions
             _stream.Dispose();
             
         }
-
-        /// <summary>
-        /// Notifies an enlisted object that an escalation of the delegated transaction has been requested.
-        /// </summary>
-        /// <returns>
-        /// A transmitter/receiver propagation token that marshals a distributed transaction. For more information, see <see cref="M:System.Transactions.TransactionInterop.GetTransactionFromTransmitterPropagationToken(System.Byte[])" />.
-        /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
+    
         public byte[] Promote()
         {
             _notOnlyLocalEffects = true;
@@ -207,16 +231,7 @@ namespace Dataspace.Common.Transactions
 
         public void Prepare(PreparingEnlistment preparingEnlistment)
         {
-            try
-            {
-                WriteResources();
-                preparingEnlistment.Prepared();
-            }
-            catch (Exception ex)
-            {
-                preparingEnlistment.ForceRollback(ex);
-                throw;
-            }
+            preparingEnlistment.Prepared();
         }
 
         public void Commit(Enlistment enlistment)

@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mappers\LogContext.cs" />
-    <Compile Include="Mappers\StatisticEventMapper.cs" />
     <Compile Include="SQLLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

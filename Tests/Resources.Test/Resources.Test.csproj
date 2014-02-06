@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\AccumulatingTestWithCache.cs" />
+    <Compile Include="Caching\SecondLevelCacheTest3.cs" />
     <Compile Include="Queries\ParamNamesTest.cs" />
     <Compile Include="Queries\QueriesTest.cs" />
     <Compile Include="Queries\MultipleQueryingTest.cs" />

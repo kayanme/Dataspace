@@ -24,7 +24,7 @@ namespace Resources.Test.Caching
         {
             var cache =
                 new UpgradedCache
-                    <Guid, TestClass, NoReferenceUpdatableElement<TestClass>>(
+                    <Guid, TestClass, NoReferenceUpdatableElement<TestClass>>(true,
                     Comparer<Guid>.Default,  EqualityComparer<Guid>.Default,
                                                                 a => a());
             var acc = new Accumulator<Guid, TestClass>(

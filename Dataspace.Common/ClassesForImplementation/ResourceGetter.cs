@@ -65,7 +65,7 @@ namespace Dataspace.Common.ClassesForImplementation
         [Pure]
         protected abstract IEnumerable<KeyValuePair<Guid, object>> GetItemsInt(IEnumerable<Guid> id);
 
-        internal abstract object ReturnAccumulator(ICachierStorage<Guid> storage, Func<Guid, object> getResource);
+        internal abstract IAccumulator<Guid,object> ReturnAccumulator(ICachierStorage<Guid> storage, Func<Guid, object> getResource);
     }
 
 
@@ -99,7 +99,7 @@ namespace Dataspace.Common.ClassesForImplementation
         }
 
 
-        internal sealed override object ReturnAccumulator(ICachierStorage<Guid> storage,Func<Guid,object> getResource )
+        internal sealed override IAccumulator<Guid, object> ReturnAccumulator(ICachierStorage<Guid> storage, Func<Guid, object> getResource)
         {
             return new Accumulator<Guid, T>(storage.Push, storage.HasActualValue,k=> getResource(k) as T, GetItemsTyped);
         } 

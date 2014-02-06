@@ -56,7 +56,7 @@ namespace Dataspace.Common.Services
         private IEnumerable<Lazy<ResourcePoster,ActivationSwitchAttribute>> writers;
 
         [Import(RequiredCreationPolicy = CreationPolicy.Shared)]         
-        private DataStore.DataStoreServicesPackage _servicesPackage;
+        private DataStoreServicesPackage _servicesPackage;
 #pragma warning restore 0649
 
         #endregion
@@ -137,7 +137,7 @@ namespace Dataspace.Common.Services
             _container.Container.ComposeExportedValue(store);
           
 
-            store.Initialize(registration.IsCacheData);
+            store.Initialize(registration.IsCacheData,registration.CollectRareItems);
             
             if (registration.IsSecuritized)
                 _securityManager.RegisterSecuritizedType(type);           
@@ -148,19 +148,20 @@ namespace Dataspace.Common.Services
         /// <summary>
         /// Производит регистрации всех типов.
         /// </summary>
-        /// <param name="type">Тип.</param>
-        internal void CommitRegistration(Type type)
+        /// <param name="registration">Тип.</param>
+        internal void CommitRegistration(Registration registration)
         {
-            ImplyUpdatePolicy(type);
+            ImplyUpdatePolicy(registration);
         }
 
         /// <summary>
         /// Применяет описанные в ресурсе политики кэширования.
         /// </summary>
         /// <param name="type">Тип ресурса.</param>
-        private void ImplyUpdatePolicy(Type type)
+        private void ImplyUpdatePolicy(Registration registration)
         {
-            var policies = type.GetCustomAttributes(typeof(CachingPolicyAttribute), false).OfType<CachingPolicyAttribute>();
+            var type = registration.ResourceType;
+            var policies = registration.CachingPolicy;
             DataStore getter;
             try
             {
@@ -211,33 +212,34 @@ namespace Dataspace.Common.Services
         {                    
             try
             {
-                foreach (var regisration in _registrationStorage.AllRegistrations)
+                foreach (var registration in _registrationStorage.AllRegistrations)
                 {
                     try
                     {
-                        PrepareRegistration(regisration);
+                        PrepareRegistration(registration);
                     }
                     catch (Exception ex)
                     {
-                        throw new InvalidOperationException("Ошибка подготовки типа:" + regisration.ResourceName, ex);
+                        throw new InvalidOperationException("Ошибка подготовки типа:" + registration.ResourceName, ex);
                     }
                 }
 
-                foreach (var type in _registrationStorage.AllRegistrations.Select(k=>k.ResourceType))
+                foreach (var registration in _registrationStorage.AllRegistrations)
                 {
                     try
                     {
-                        CommitRegistration(type);
+                        CommitRegistration(registration);
                     }
                     catch (Exception ex)
                     {
-                        throw new InvalidOperationException("Ошибка регистрации типа:" + type.Name, ex);
+                        throw new InvalidOperationException("Ошибка регистрации типа:" + registration.ResourceName, ex);
                     }
                 }                              
             }
             catch (Exception)
             {
-                Debugger.Break();
+                if (Debugger.IsAttached)
+                   Debugger.Break();
                 _registrationStorage.FlushRegistraions();
                 _stores.Clear();
                //любая ошибка должна чистить регистрации                           

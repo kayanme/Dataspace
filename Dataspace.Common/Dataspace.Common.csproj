@@ -129,12 +129,14 @@
     <Compile Include="ClassesForImplementation\Security\SecurityProvider.cs" />
     <Compile Include="ClassesForImplementation\Security\ISecurityContext.cs" />
     <Compile Include="ClassesForImplementation\PropertiesProvider.cs" />
+    <Compile Include="Data\CachierStorageSettings.cs" />
     <Compile Include="Data\DataRecord.cs" />
     <Compile Include="Data\QueryDelegates.cs" />
     <Compile Include="Data\ResourceType.cs" />
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Data\UriQuery.cs" />
     <Compile Include="Exceptions\PostException.cs" />
+    <Compile Include="Interfaces\IAccumulator.cs" />
     <Compile Include="Interfaces\IAnnouncerSubscriptor.cs" />
     <Compile Include="Interfaces\ICacheServicing.cs" />
     <Compile Include="Interfaces\ICacheUnactualityNotifier.cs" />
@@ -171,6 +173,7 @@
     <Compile Include="Projections\Services\Writers\XmlStreamer.cs" />
     <Compile Include="Projections\Services\Writers\XmlWriter.cs" />
     <Compile Include="ServiceResources\QueryInfo.cs" />
+    <Compile Include="Services\DataStoreServicesPackage.cs" />
     <Compile Include="Services\SerialPoster.cs" />
     <Compile Include="Statistics\Events\BranchChanged.cs" />
     <Compile Include="Statistics\Events\SerialPostEvent.cs" />

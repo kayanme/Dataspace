@@ -31,24 +31,30 @@ namespace Dataspace.Common.Services
         public void PostPacket(IEnumerable<DataRecord> resources)
         {
             Debug.Assert(resources != null,"resource!=null");
-            IEnumerable<DataRecord> notWrittenResources = 
-            _packetResourcePosters.
-                Aggregate(resources,
-                          (a, s) =>
-                              {
-                                  if (a.Any())
-                                  {
-                                      var w = Stopwatch.StartNew();
-                                      a = s.PostResourceBlock(a).ToArray();
-                                      w.Stop();
-                                      _statChannel.SendMessageAboutMultipleResources(new Guid[3], Actions.Posted,
-                                                                                     w.Elapsed);
-                                  }
-                                  return a;
-                              });
-        
-            if (notWrittenResources!=null && notWrittenResources.Any())
+            var notWrittenResources =
+               _packetResourcePosters.
+                   Aggregate(resources,
+                             (a, s) =>
+                             {
+                                 if (a.Any())
+                                 {
+                                     var w = Stopwatch.StartNew();
+                                     a = s.PostResourceBlock(a).ToArray();
+                                     w.Stop();
+
+                                     _statChannel.SendMessageAboutMultipleResources(new Guid[3], Actions.Posted,
+                                                                                    w.Elapsed);
+                                 }
+                                 return a;
+                             });
+            foreach (var dataRecord in resources)
+            {
+                if (!notWrittenResources.Any(k => k.Content == dataRecord.Content))
+                    dataRecord.UpdateSender();
+            }
+            if (notWrittenResources != null && notWrittenResources.Any())
                 EmulatedSerialPost(notWrittenResources);
+
             
         }
 

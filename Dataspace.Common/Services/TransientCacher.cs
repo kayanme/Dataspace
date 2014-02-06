@@ -552,6 +552,24 @@ namespace Common
             
         }
 
+        public void LockCaches(IEnumerable<string> resNames, List<string> alreadyProcessed)
+        {
+            var storesToLock = resNames.Except(alreadyProcessed).Select(k => _stores[_registrationStorage[k].ResourceType]).ToArray();
+            foreach (var dataStore in storesToLock)
+            {
+                dataStore.LockForReadingThisAndDependent(alreadyProcessed);
+            }
+        }
+
+        public void UnlockCaches(IEnumerable<string> resNames, List<string> alreadyProcessed)
+        {
+            var storesToUnlock = resNames.Except(alreadyProcessed).Select(k => _stores[_registrationStorage[k].ResourceType]).ToArray();
+            foreach (var dataStore in storesToUnlock)
+            {
+                dataStore.UnlockForReadingThisAndDependent(alreadyProcessed);
+            }
+        }
+
 
         public void CachePanic()
         {

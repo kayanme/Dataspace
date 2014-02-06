@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Dataspace.Common.Attributes;
+using Dataspace.Common.Attributes.CachingPolicies;
 using Dataspace.Common.ServiceResources;
 
 namespace Dataspace.Common.ClassesForImplementation
@@ -13,9 +14,9 @@ namespace Dataspace.Common.ClassesForImplementation
     public abstract class ResourceRegistrator
     {
 
-        protected Registration CreateRegistration(Type type,string name,bool isSecuritized,bool isCacheData)
+        protected Registration CreateRegistration(Type type,string name,bool isSecuritized,bool isCacheData,bool collectRareItems,IEnumerable<CachingPolicyAttribute> cachingPolicies)
         {
-            return new Registration(name,type,isSecuritized,isCacheData);
+            return new Registration(name,type,isSecuritized,isCacheData,collectRareItems,cachingPolicies);
         }
 
         protected internal virtual IEnumerable<Registration> GetRegistrations()
@@ -25,6 +26,8 @@ namespace Dataspace.Common.ClassesForImplementation
                 string name;
                 bool isCacheData;
                 bool isSecuritized;
+                IEnumerable<CachingPolicyAttribute> cachePolicies;
+                bool collectRareItems = true;
                 try
                 {                    
                     //определение ресурса
@@ -35,6 +38,9 @@ namespace Dataspace.Common.ClassesForImplementation
                     //защищен ли ресурс настройками безопасности
                     var securitized =
                         Attribute.GetCustomAttribute(type, typeof (SecuritizedAttribute)) as SecuritizedAttribute;
+                    cachePolicies =
+                        Attribute.GetCustomAttributes(type, typeof(CachingPolicyAttribute),false).Cast<CachingPolicyAttribute>().ToArray();
+
                     isSecuritized = securitized != null;
                     if (definition != null) //если это ресурс
                     {
@@ -43,6 +49,7 @@ namespace Dataspace.Common.ClassesForImplementation
                             throw new InvalidOperationException("Либо ресурс, либо данные для кэширования!");
                         name = definition.Name;
                         isCacheData = false;
+                        collectRareItems = cacheData.CollectRareItems;
 
                     }
                     else if (cacheData != null) //если это кэш-данные
@@ -62,7 +69,7 @@ namespace Dataspace.Common.ClassesForImplementation
                 {
                     throw new InvalidOperationException("Ошибка подготовки типа:" + type.Name, ex);
                 }
-                yield return CreateRegistration(type, name, isSecuritized, isCacheData);
+                yield return CreateRegistration(type, name, isSecuritized, isCacheData,collectRareItems,cachePolicies);
             }
         }
 

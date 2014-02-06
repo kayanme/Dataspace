@@ -10,6 +10,8 @@ namespace Dataspace.Common.Attributes
 
 		public bool DefaultQuerier { get; set; }
 
+        public bool CollectRareItems = true;
+
         public CachingDataAttribute(string name)
         {
             Name = name;

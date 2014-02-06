@@ -18,9 +18,12 @@ namespace Dataspace.Common.Utility.Dictionary.SecondLevelCache
 
         private bool _wasGC = false;
 
-        public CacheController(SecondLevelCache<TKey,TValue> controlledCache)
+        private bool _changeBranchLength;
+
+        public CacheController(SecondLevelCache<TKey,TValue> controlledCache,bool fixAllNodes)
         {
             _controlledCache = controlledCache;
+            _changeBranchLength = !fixAllNodes;
             Settings = new CacheAdaptationSettings
                            {
                                CheckThreshold= 50,
@@ -67,6 +70,30 @@ namespace Dataspace.Common.Utility.Dictionary.SecondLevelCache
                 new GCNotificator(this);
         }
 
+        private void DecreaseBranchDepthIfNeeded()
+        {
+            if (_changeBranchLength)
+            {
+                _lastActionWasBranchIncreasing = false;
+                if (_controlledCache.State.MaxFixedBranchDepth > 1)
+                {
+                    _controlledCache.State.MaxFixedBranchDepth--;
+                    GC.Collect(2);
+                }
+                _nodeBeenGoneSinceLastBranchIncreasing = 0;
+            }
+        }
+
+        private void IncreaseBranchDepthIfNeeded()
+        {
+            if (_changeBranchLength)
+            {
+                _controlledCache.State.MaxFixedBranchDepth++;              
+                _nodeBeenGoneSinceLastBranchIncreasing = 0;
+                _lastActionWasBranchIncreasing = true;
+            }
+        }
+
         /// <summary >
         /// Принимает решение об адаптакии кэша к текущим условиям. На данный момент решения следующие:
         /// 1. Если интенсивность ухода данных из кэша слишком низка
@@ -85,29 +112,21 @@ namespace Dataspace.Common.Utility.Dictionary.SecondLevelCache
                 && (_wasGC || wasNodeGone)
                 &&  (double)_nodeBeenGoneSinceLastBranchIncreasing/_controlledCache.Count < 0.05)
             {
-                _lastActionWasBranchIncreasing = false;
-                if (_controlledCache.State.MaxFixedBranchDepth > 1 )
-                {                    
-                    _controlledCache.State.MaxFixedBranchDepth--;                                      
-                    GC.Collect(2);
-                }
-                _nodeBeenGoneSinceLastBranchIncreasing = 0;
-             
+                DecreaseBranchDepthIfNeeded();
+
             }
             else if (_controlledCache.State.GoneIntensity > Settings.GoneIntensityForBranchIncrease
                 && !_controlledCache.State.RebalancingQueued
                 && (double)_nodeBeenGoneSinceLastBranchIncreasing/_controlledCache.Count > 0.05)
             {            
-                
-                _controlledCache.State.MaxFixedBranchDepth ++;
+                               
                 if (!_lastActionWasBranchIncreasing 
                  && Settings.MinBranchLengthToRebalance<_controlledCache.State.MaxFixedBranchDepth)
                 {
                     _controlledCache.QueueRebalance(Settings.RebalancingMode);
                
                 }
-                _nodeBeenGoneSinceLastBranchIncreasing = 0;
-                _lastActionWasBranchIncreasing = true;                
+                IncreaseBranchDepthIfNeeded();
             }
            
             CreateNotificationIfItDoesntExists();

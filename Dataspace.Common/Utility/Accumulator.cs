@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using Dataspace.Common.Interfaces;
 
 namespace Dataspace.Common.Utility
 {
-    public sealed class Accumulator<TKey, TValue>:IDisposable 
+    public sealed class Accumulator<TKey, TValue> : IDisposable, IAccumulator<TKey,TValue>
     {
 
         private readonly Predicate<TKey> _presentsInSource;

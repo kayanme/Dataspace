@@ -39,22 +39,32 @@ namespace Dataspace.Common.Transactions
 
 
         public void AddResourceToSend(UnactualResourceContent description, object resource,
-                                      Action<Guid,object> poster)
+                                      Action<Guid, object> poster, Action updateSender)
         {
             Contract.Requires(Transaction.Current != null);
             if (Transaction.Current == null || _dependentTransactionRepository.IsOurTransaction(Transaction.Current))
+            {
                 poster(description.ResourceKey, resource);
+            }
             else
             {
-                var transactedResourceStorage = _centralStore.GetResourceStorage(() => new TransactionPacketStorage(_poster, _dependentTransactionRepository));
-                transactedResourceStorage.AddResourceToPost(new DataRecord
-                {
-                    Content = description,
-                    Resource = resource,
-                    Poster = poster
-                });    
+                var transactedResourceStorage =
+                    _centralStore.GetResourceStorage(
+                        () => new TransactionPacketStorage(_poster, _dependentTransactionRepository));
+                transactedResourceStorage.AddResourceToPost(new DataRecord(updateSender, poster, resource, description));
             }
-            
+        }
+
+
+        public void AddResourceToCurrentTransaction(UnactualResourceContent description, object resource)
+        {
+            Contract.Requires(Transaction.Current != null);
+            if (Transaction.Current != null && !_dependentTransactionRepository.IsOurTransaction(Transaction.Current))
+            {
+                var transactedResourceStorage = _centralStore.GetResourceStorage(() => new TransactionPacketStorage(_poster, _dependentTransactionRepository));
+                transactedResourceStorage.AddResourceToLocalTransaction(description, resource);
+            }
+
         }
 
         public IEnumerable<T> GetTransactedItems<T>(Expression<Func<T,bool>> query)

@@ -135,7 +135,7 @@ namespace Dataspace.Common.ServiceResources
                   return args => (_queryMethod(Reorder(args, reordering)) as MultKeys).SelectMany(k => k.Value).Distinct();
                 else
                 {
-                    return args => (_queryMethod(Reorder(args.Select((k, i) => conversingFunctions[i](k)).ToArray(), reordering)) as MultKeys).SelectMany(k => k.Value).Distinct();
+                    return args => (_queryMethod(Reorder(args, reordering).Select((k, i) => conversingFunctions[i](k)).ToArray()) as MultKeys).SelectMany(k => k.Value).Distinct();
                 }
             }
             else if (_returnType == typeof(IEnumerable<Guid>))
